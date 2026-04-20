@@ -1070,5 +1070,355 @@
       ],
       "tensions": []
     }
+  },
+  "TKM": {
+    "basic": {
+      "name": "Turkmenistan",
+      "capital": "Ashgabat",
+      "region": "Central Asia",
+      "government": "Presidential republic (highly authoritarian)",
+      "languages": ["Turkmen"],
+      "currency": "Turkmenistani Manat (TMT)"
+    },
+    "snapshot": {
+      "population": "7.1 million",
+      "gdp": "$76 billion",
+      "gdp_per_capita": "$10,700",
+      "economy_type": "Gas-dominant, closed"
+    },
+    "identity": "Most closed Central Asian state with immense gas reserves. Officially 'permanently neutral.' Recently transitioned father-to-son presidency in dynastic pattern.",
+    "strengths": ["World's fourth-largest natural gas reserves", "Strategic location for pipelines", "Political stability (through repression)"],
+    "weaknesses": ["Extreme isolation", "Opaque economy", "Personality cult governance", "Infrastructure bottlenecks", "Heavy China gas dependence (single buyer)"],
+    "current_position": "Serdar Berdimuhamedov continuing father's authoritarian model; gas exports almost entirely to China; tentative engagement with Afghanistan via TAPI pipeline discussions; minimal international footprint.",
+    "history_brief": "Soviet republic. Independence 1991 under Niyazov (Turkmenbashi), cult of personality. Died 2006. Gurbanguly Berdimuhamedov ruled 2007-2022. Son Serdar became president 2022 while father kept other powers. One of the world's most closed societies.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Dominant gas customer, essentially monopoly"},
+        {"country": "RUS", "reason": "Historical ties, limited gas trade"},
+        {"country": "TUR", "reason": "Turkic cultural connection"},
+        {"country": "UZB", "reason": "Regional cooperation, energy"},
+        {"country": "AFG", "reason": "TAPI pipeline interest"}
+      ],
+      "tensions": []
+    }
+  },
+  "KGZ": {
+    "basic": {
+      "name": "Kyrgyzstan",
+      "capital": "Bishkek",
+      "region": "Central Asia",
+      "government": "Presidential republic",
+      "languages": ["Kyrgyz", "Russian"],
+      "currency": "Kyrgyzstani Som (KGS)"
+    },
+    "snapshot": {
+      "population": "7 million",
+      "gdp": "$14 billion",
+      "gdp_per_capita": "$2,000",
+      "economy_type": "Small, remittance and mining"
+    },
+    "identity": "Mountainous Central Asian state with most open political culture in the region (though regressing). Economically dependent on Russia for remittances and on China for trade.",
+    "strengths": ["Most pluralist Central Asian political tradition", "Kumtor gold mine", "Tourism potential", "Strategic location"],
+    "weaknesses": ["Chronic political instability (multiple revolutions)", "Heavy remittance dependence on Russia", "Ethnic tensions with Uzbek minority", "Recent authoritarian slide", "Mining governance issues"],
+    "current_position": "Japarov consolidating power; managing Russian remittance-driven economy while absorbing sanctions-evasion trade; tensions with Tajikistan over border; tightening media and civil society restrictions.",
+    "history_brief": "Soviet republic. Independence 1991. Revolutions 2005 (Akayev out), 2010 (Bakiyev out), 2020 (Japarov rose). Most freewheeling Central Asian politics historically. Border clashes with Tajikistan 2022. Slide toward authoritarianism under Japarov.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "RUS", "reason": "CSTO, remittance source, deep influence"},
+        {"country": "CHN", "reason": "Major trade partner, transit"},
+        {"country": "KAZ", "reason": "Regional partner"},
+        {"country": "UZB", "reason": "Improving ties, border settled"},
+        {"country": "TUR", "reason": "Turkic bloc"}
+      ],
+      "tensions": [
+        {"country": "TJK", "reason": "Border disputes, recent armed clashes"}
+      ]
+    }
+  },
+  "TJK": {
+    "basic": {
+      "name": "Tajikistan",
+      "capital": "Dushanbe",
+      "region": "Central Asia",
+      "government": "Presidential republic (authoritarian)",
+      "languages": ["Tajik"],
+      "currency": "Tajikistani Somoni (TJS)"
+    },
+    "snapshot": {
+      "population": "10.2 million",
+      "gdp": "$13 billion",
+      "gdp_per_capita": "$1,280",
+      "economy_type": "Poorest Central Asia, remittances"
+    },
+    "identity": "Persian-speaking Central Asian state, poorest in the region. Under Rahmon's 30-year rule. Border with Afghanistan gives heightened security dimension.",
+    "strengths": ["Hydropower potential (Rogun Dam)", "Aluminum exports", "Strategic Afghan border position", "Russian security partnership"],
+    "weaknesses": ["Poorest Central Asian state", "Heavy remittance dependence", "Long Afghan border security", "Suppressed political opposition", "Clan politics"],
+    "current_position": "Rahmon continuing long authoritarian rule with son being positioned as successor; security-focused given Afghan border; CSTO anchor for Russia; receiving Chinese investment.",
+    "history_brief": "Soviet republic. Independence 1991. Brutal civil war 1992–97 (tens of thousands killed). Rahmon ruled since. Islamist opposition banned 2015. Border clashes with Kyrgyzstan 2022. Deepening China ties.",
+    "relationships": {
+      "allies": [
+        {"country": "RUS", "reason": "CSTO, Russian military base, security backer"}
+      ],
+      "working": [
+        {"country": "CHN", "reason": "Investment, security cooperation, debt"},
+        {"country": "IRN", "reason": "Persian cultural connection"},
+        {"country": "UZB", "reason": "Improved regional ties"},
+        {"country": "KAZ", "reason": "Regional cooperation"}
+      ],
+      "tensions": [
+        {"country": "KGZ", "reason": "Border disputes, armed clashes"},
+        {"country": "AFG", "reason": "Anti-Taliban stance, border security"}
+      ]
+    }
+  },
+  "IDN": {
+    "basic": {
+      "name": "Indonesia",
+      "capital": "Jakarta (Nusantara under transition)",
+      "region": "Southeast Asia",
+      "government": "Presidential republic",
+      "languages": ["Indonesian (Bahasa Indonesia)"],
+      "currency": "Indonesian Rupiah (IDR)"
+    },
+    "snapshot": {
+      "population": "278 million",
+      "gdp": "$1.4 trillion (16th largest)",
+      "gdp_per_capita": "$5,000",
+      "economy_type": "Emerging, resources and manufacturing"
+    },
+    "identity": "World's fourth most populous nation, largest Muslim-majority democracy, and the giant of Southeast Asia. Non-aligned foreign policy tradition. Rising middle power.",
+    "strengths": ["Huge domestic market", "Resource wealth (nickel, coal, palm oil)", "Demographic dividend", "G20 middle-power diplomacy", "Democratic consolidation"],
+    "weaknesses": ["Infrastructure gaps despite improvement", "Corruption", "Regional inequality", "Capital relocation execution risks", "Middle-income trap concerns"],
+    "current_position": "Under Prabowo Subianto (inaugurated Oct 2024), pursuing resource-based industrialization; balancing US and China with growing defense ties to both; new capital Nusantara project in question; expanding BRICS and Global South diplomacy.",
+    "history_brief": "Dutch colony 300+ years. Independence declared 1945, recognized 1949. Sukarno's Guided Democracy. Suharto's New Order 1967-98. Democratic transition 1998. SBY and Jokowi periods stabilized democracy. Prabowo (Suharto-era general) won 2024 election.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "USA", "reason": "Strategic partnership, defense cooperation"},
+        {"country": "CHN", "reason": "Largest trade partner, nickel investment, BRI"},
+        {"country": "JPN", "reason": "Major investor, infrastructure"},
+        {"country": "AUS", "reason": "Defense and economic partner"},
+        {"country": "KOR", "reason": "Major investor, defense (KF-21 program)"},
+        {"country": "RUS", "reason": "Defense equipment, energy"},
+        {"country": "IND", "reason": "Growing partnership, Indo-Pacific"}
+      ],
+      "tensions": [
+        {"country": "CHN", "reason": "Natuna Islands EEZ disputes (maintained alongside cooperation)"}
+      ]
+    }
+  },
+  "THA": {
+    "basic": {
+      "name": "Thailand",
+      "capital": "Bangkok",
+      "region": "Southeast Asia",
+      "government": "Constitutional monarchy with parliamentary system",
+      "languages": ["Thai"],
+      "currency": "Thai Baht (THB)"
+    },
+    "snapshot": {
+      "population": "71.8 million",
+      "gdp": "$550 billion",
+      "gdp_per_capita": "$7,700",
+      "economy_type": "Upper-middle income, manufacturing and tourism"
+    },
+    "identity": "Southeast Asia's second-largest economy, never formally colonized. Tourist and manufacturing hub. Chronic political tension between military-royalist establishment and populist/reformist movements.",
+    "strengths": ["Tourism industry (pre-COVID world-leading)", "Automotive manufacturing hub", "Agricultural exports", "Geographic centrality in ASEAN", "Hospital and medical tourism"],
+    "weaknesses": ["Demographic decline", "Political instability (coups, constitutional crises)", "Middle-income trap", "Lèse-majesté restrictions", "Southern insurgency"],
+    "current_position": "Paetongtarn Shinawatra government continuing family's political dynasty under military-royalist constraints; economic stimulus and digital wallet scheme; balancing US alliance with deep China trade; cautious Myanmar engagement.",
+    "history_brief": "Siam modernized under Chulalongkorn avoiding colonization. Constitutional monarchy 1932. Chronic military interventions (20+ coups). King Bhumibol's 70-year reign until 2016. Thaksin Shinawatra era political divide from 2001. Multiple coups. Move Forward Party dissolved 2024. Shinawatra family back in power.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Major non-NATO ally, treaty partner"}
+      ],
+      "working": [
+        {"country": "CHN", "reason": "Largest trade partner, defense equipment"},
+        {"country": "JPN", "reason": "Major investor, automotive"},
+        {"country": "KOR", "reason": "Investment, defense cooperation"},
+        {"country": "IND", "reason": "Act East partner"},
+        {"country": "ARE", "reason": "Tourism and trade"}
+      ],
+      "tensions": [
+        {"country": "MMR", "reason": "Complex: border, refugees, scam compounds"},
+        {"country": "KHM", "reason": "Occasional border and heritage disputes"}
+      ]
+    }
+  },
+  "VNM": {
+    "basic": {
+      "name": "Vietnam",
+      "capital": "Hanoi",
+      "region": "Southeast Asia",
+      "government": "One-party socialist republic (Communist Party)",
+      "languages": ["Vietnamese"],
+      "currency": "Vietnamese Dong (VND)"
+    },
+    "snapshot": {
+      "population": "100 million",
+      "gdp": "$470 billion",
+      "gdp_per_capita": "$4,700",
+      "economy_type": "Manufacturing-driven, rapidly growing"
+    },
+    "identity": "Communist-led but aggressively capitalist economy. Biggest beneficiary of China+1 supply chain shift. Deft bamboo diplomacy balancing US, China, and Russia.",
+    "strengths": ["Manufacturing attractiveness for FDI", "Young, educated workforce", "Diplomatic agility", "Export discipline", "Political stability"],
+    "weaknesses": ["One-party political ceiling", "Anti-corruption 'blazing furnace' campaign disrupts business", "Infrastructure gaps", "Aging ahead of getting rich", "Climate vulnerability"],
+    "current_position": "To Lam consolidating power after anti-corruption campaign toppled rivals; hosting upgraded Comprehensive Strategic Partnerships with US, Russia, Japan, and others; major FDI beneficiary; South China Sea tensions with China managed carefully.",
+    "history_brief": "French colony, Ho Chi Minh's independence struggle. Partitioned 1954. Vietnam War 1955–75, communist victory. Doi Moi economic reforms 1986. WTO 2007. Manufacturing boom accelerated by US-China trade war. Major leadership changes 2023–24 elevated To Lam.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "USA", "reason": "Comprehensive Strategic Partnership 2023, major trade"},
+        {"country": "CHN", "reason": "Largest trade partner, ideological ally, disputes managed"},
+        {"country": "RUS", "reason": "Historic defense supplier, recent CSP upgrade"},
+        {"country": "KOR", "reason": "Largest FDI source, Samsung massive presence"},
+        {"country": "JPN", "reason": "Major investor, infrastructure"},
+        {"country": "IND", "reason": "Strategic partner, defense cooperation"},
+        {"country": "AUS", "reason": "Comprehensive Strategic Partnership"}
+      ],
+      "tensions": [
+        {"country": "CHN", "reason": "South China Sea territorial disputes (despite cooperation)"}
+      ]
+    }
+  },
+  "PHL": {
+    "basic": {
+      "name": "Philippines",
+      "capital": "Manila",
+      "region": "Southeast Asia",
+      "government": "Presidential republic",
+      "languages": ["Filipino", "English"],
+      "currency": "Philippine Peso (PHP)"
+    },
+    "snapshot": {
+      "population": "117 million",
+      "gdp": "$475 billion",
+      "gdp_per_capita": "$4,060",
+      "economy_type": "Services and remittances"
+    },
+    "identity": "Southeast Asian archipelago closest to US historically. Under Marcos Jr. decisively back in US orbit after Duterte's China pivot. Front-line state in South China Sea pushback.",
+    "strengths": ["English-speaking workforce", "BPO industry global leader", "OFW remittances", "Young population", "US alliance and defense access (EDCA)"],
+    "weaknesses": ["Poverty and inequality", "Natural disaster exposure (typhoons)", "Corruption", "Infrastructure gaps", "Political polarization (Marcos-Duterte rift)"],
+    "current_position": "Marcos Jr. accelerating US military access (new EDCA sites) and Japan/Australia trilaterals; publicly confronting Chinese coercion in South China Sea; Duterte-Marcos alliance collapse reshaping domestic politics; ICC Duterte case proceedings.",
+    "history_brief": "Spanish colony 300+ years. US colony 1898. Independence 1946. Marcos Sr. dictatorship 1965–86. People Power revolution. Corazon Aquino democratic restoration. Duterte's war on drugs 2016–22. Marcos Jr (son) won 2022 in alliance with Duterte's daughter, which has since fractured.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Mutual Defense Treaty, EDCA expansion"},
+        {"country": "JPN", "reason": "RAA signed, major investor"},
+        {"country": "AUS", "reason": "Strategic partnership, defense"}
+      ],
+      "working": [
+        {"country": "KOR", "reason": "Strategic partner, FA-50 jets"},
+        {"country": "IND", "reason": "BrahMos missile deal, growing defense"},
+        {"country": "VNM", "reason": "Shared China concerns, cooperation"}
+      ],
+      "tensions": [
+        {"country": "CHN", "reason": "South China Sea confrontations at shoals, water cannon incidents"}
+      ]
+    }
+  },
+  "MYS": {
+    "basic": {
+      "name": "Malaysia",
+      "capital": "Kuala Lumpur (Putrajaya administrative)",
+      "region": "Southeast Asia",
+      "government": "Federal parliamentary constitutional monarchy",
+      "languages": ["Malay", "English"],
+      "currency": "Malaysian Ringgit (MYR)"
+    },
+    "snapshot": {
+      "population": "34 million",
+      "gdp": "$440 billion",
+      "gdp_per_capita": "$13,000",
+      "economy_type": "Upper-middle income, diversified"
+    },
+    "identity": "Multicultural (Malay, Chinese, Indian) Southeast Asian state balancing Islamic identity with economic openness. Major semiconductor assembly hub benefiting from China+1.",
+    "strengths": ["Semiconductor back-end dominance", "Palm oil and rubber exports", "Tourism", "Strategic Malacca Strait position", "Stable infrastructure"],
+    "weaknesses": ["Ethnic/religious balance pressures", "Brain drain to Singapore", "1MDB legacy trust issues", "Middle-income trap risks"],
+    "current_position": "Under Anwar Ibrahim's unity government, balancing US and China with lean toward China economically; Johor-Singapore Special Economic Zone push; strong pro-Palestinian stance straining some Western ties; semiconductor investment surge.",
+    "history_brief": "British Malaya. Independence 1957. Malaysia formed 1963 (Singapore left 1965). Mahathir's long rule 1981–2003 and again 2018–20. 1MDB scandal toppled Najib Razak. Anwar Ibrahim finally became PM November 2022 after 25-year journey.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Largest trade partner, major investor"},
+        {"country": "USA", "reason": "Comprehensive partnership, semiconductor investment"},
+        {"country": "JPN", "reason": "Major investor, Look East legacy"},
+        {"country": "SGP", "reason": "Causeway neighbor, JS-SEZ cooperation"},
+        {"country": "IDN", "reason": "Regional partner in ASEAN"},
+        {"country": "SAU", "reason": "Religious and economic ties"}
+      ],
+      "tensions": [
+        {"country": "ISR", "reason": "No relations, vocal pro-Palestinian stance"}
+      ]
+    }
+  },
+  "SGP": {
+    "basic": {
+      "name": "Singapore",
+      "capital": "Singapore",
+      "region": "Southeast Asia",
+      "government": "Parliamentary republic (dominant-party)",
+      "languages": ["English", "Mandarin", "Malay", "Tamil"],
+      "currency": "Singapore Dollar (SGD)"
+    },
+    "snapshot": {
+      "population": "6 million",
+      "gdp": "$525 billion",
+      "gdp_per_capita": "$87,800",
+      "economy_type": "Advanced, financial/logistics hub"
+    },
+    "identity": "City-state and global hub for finance, logistics, and increasingly tech. Technocratic governance and strategic neutrality make it indispensable to everyone. Recent prime ministerial transition from Lee family.",
+    "strengths": ["World-class port and logistics", "Financial hub in Asia", "Political stability and rule of law", "Skilled workforce", "Strategic neutrality position", "Highest PISA scores"],
+    "weaknesses": ["Ultra-high cost of living", "Dependence on imports (food, water)", "Fertility collapse", "One-party dominance limits scrutiny", "Caught in US-China tensions"],
+    "current_position": "Lawrence Wong took over as PM May 2024 (4G succession from Lee Hsien Loong); continuing balancing act between US (security) and China (trade); AI and sustainability push; managing regional instability (Myanmar, South China Sea).",
+    "history_brief": "British colony, briefly in Malaysia 1963-65. Expelled 1965, Lee Kuan Yew drove state-led development. Transformed from third-world port to first-world hub in one generation. Goh Chok Tong (1990-2004), Lee Hsien Loong (2004-2024), Lawrence Wong now.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "USA", "reason": "Strategic partner, host to Navy logistics"},
+        {"country": "CHN", "reason": "Largest trade partner, deep economic ties"},
+        {"country": "MYS", "reason": "Neighbor, JS-SEZ, water agreement"},
+        {"country": "IDN", "reason": "Largest FDI source for Indonesia, regional partner"},
+        {"country": "IND", "reason": "CECA partner, major diaspora connections"},
+        {"country": "AUS", "reason": "CSP, FTA, defense cooperation"},
+        {"country": "JPN", "reason": "Close economic and investment partner"}
+      ],
+      "tensions": []
+    }
+  },
+  "MMR": {
+    "basic": {
+      "name": "Myanmar",
+      "capital": "Naypyidaw",
+      "region": "Southeast Asia",
+      "government": "Military junta (State Administration Council)",
+      "languages": ["Burmese"],
+      "currency": "Myanmar Kyat (MMK)"
+    },
+    "snapshot": {
+      "population": "54 million",
+      "gdp": "$65 billion (collapsed)",
+      "gdp_per_capita": "$1,200",
+      "economy_type": "Collapsed, resource extraction, illicit"
+    },
+    "identity": "Southeast Asian country in civil war since 2021 military coup. Junta losing territory to ethnic armed organizations and pro-democracy forces. Major hub of cyber-scam compounds.",
+    "strengths": ["Natural resources (jade, rare earths, timber, gas)", "Strategic position between India and China", "Young population"],
+    "weaknesses": ["Ongoing civil war", "Economic collapse", "Humanitarian catastrophe", "Cyber-scam compound notoriety", "Rohingya crisis unresolved", "International isolation"],
+    "current_position": "Junta losing ground since Operation 1027 offensive by ethnic alliance; National Unity Government (opposition) gaining recognition; China pressuring all sides for stability; Thailand and India hedging; ASEAN paralyzed.",
+    "history_brief": "British Burma. Independence 1948. Military rule from 1962. Aung San Suu Kyi's struggle 1988 onward. Partial democratic opening 2011-21. NLD election wins. February 2021 coup by Min Aung Hlaing triggered civil war that has since escalated dramatically.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Major backer of junta, pipelines, investment, but managing instability"},
+        {"country": "RUS", "reason": "Military supplier to junta"},
+        {"country": "IND", "reason": "Hedging engagement with junta, border security"},
+        {"country": "THA", "reason": "Border trade, refugees, scam compound cross-border issues"}
+      ],
+      "tensions": [
+        {"country": "USA", "reason": "Sanctions on junta"},
+        {"country": "BGD", "reason": "Rohingya refugee crisis, border instability"}
+      ]
+    }
   }
 }
