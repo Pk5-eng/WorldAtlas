@@ -530,5 +530,186 @@
         {"country": "SAU", "reason": "Sectarian rivalry despite recent normalization"}
       ]
     }
+  },
+  "IRQ": {
+    "basic": {
+      "name": "Iraq",
+      "capital": "Baghdad",
+      "region": "West Asia",
+      "government": "Federal parliamentary republic",
+      "languages": ["Arabic", "Kurdish"],
+      "currency": "Iraqi Dinar (IQD)"
+    },
+    "snapshot": {
+      "population": "46 million",
+      "gdp": "$265 billion",
+      "gdp_per_capita": "$5,800",
+      "economy_type": "Oil-dominant, rentier state"
+    },
+    "identity": "Post-Saddam democracy with oil wealth but deep Iranian influence through Shia militias and political parties. Struggling to assert sovereignty between US and Iranian pressure.",
+    "strengths": ["Oil reserves (top 5 globally)", "Young population", "Strategic location", "Improving stability post-ISIS"],
+    "weaknesses": ["Iranian influence and militia power", "Corruption", "Sectarian tensions", "Infrastructure decay", "Oil dependence", "Kurdistan autonomy friction"],
+    "current_position": "Pressuring US troops to withdraw while maintaining security cooperation; balancing Iran and Gulf states; rebuilding after ISIS; Kurdistan Regional Government tensions over oil revenue.",
+    "history_brief": "Ottoman territory, British mandate post-WWI. Monarchy overthrown 1958. Ba'ath Party, Saddam Hussein 1979–2003. US invasion 2003, Saddam executed 2006. Sectarian civil war, ISIS takeover 2014, defeated 2017. Gradual stabilization since.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "IRN", "reason": "Deep influence through Shia politics and militias"},
+        {"country": "USA", "reason": "Security cooperation despite tensions"},
+        {"country": "TUR", "reason": "Trade partner, tensions over PKK"},
+        {"country": "SAU", "reason": "Rapprochement, investment"},
+        {"country": "CHN", "reason": "Oil customer, infrastructure"}
+      ],
+      "tensions": [
+        {"country": "ISR", "reason": "Hostile, militia attacks in solidarity with Gaza"}
+      ]
+    }
+  },
+  "SAU": {
+    "basic": {
+      "name": "Saudi Arabia",
+      "capital": "Riyadh",
+      "region": "West Asia",
+      "government": "Absolute monarchy",
+      "languages": ["Arabic"],
+      "currency": "Saudi Riyal (SAR)"
+    },
+    "snapshot": {
+      "population": "36 million",
+      "gdp": "$1.1 trillion",
+      "gdp_per_capita": "$32,500",
+      "economy_type": "Oil-dominant, diversifying"
+    },
+    "identity": "Wealthy Gulf monarchy and Islam's holiest site. Under Crown Prince Mohammed bin Salman, pursuing aggressive economic diversification (Vision 2030) while reshaping regional politics.",
+    "strengths": ["Vast oil reserves and spare capacity", "Sovereign wealth (PIF)", "Religious prestige (Mecca/Medina)", "US security umbrella", "Political centralization enabling fast action"],
+    "weaknesses": ["Oil price exposure", "Youth unemployment", "Human rights record", "Vision 2030 execution risks", "Yemen war costs"],
+    "current_position": "Balancing US alliance with China engagement and Russia cooperation on oil; normalizing with Iran (China-brokered 2023); cautious Israel normalization on hold due to Gaza; megaprojects (NEOM, Red Sea) in execution.",
+    "history_brief": "Founded 1932 by Ibn Saud unifying Arabian Peninsula. US alliance from 1945 (oil for security). Oil nationalization 1970s. Wahhabi religious establishment influential. MBS rise from 2015 centralized power and accelerated reforms. Khashoggi murder 2018. Vision 2030 ongoing.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Security partnership, though more transactional"},
+        {"country": "ARE", "reason": "Core Gulf partner"},
+        {"country": "BHR", "reason": "Close political alignment"},
+        {"country": "EGY", "reason": "Financial support, strategic alignment"}
+      ],
+      "working": [
+        {"country": "CHN", "reason": "Largest oil customer, tech and investment"},
+        {"country": "RUS", "reason": "OPEC+ coordination"},
+        {"country": "IND", "reason": "Major oil, trade and investment partner"},
+        {"country": "PAK", "reason": "Religious and financial ties, security"},
+        {"country": "IRN", "reason": "Normalized 2023, cautious engagement"}
+      ],
+      "tensions": [
+        {"country": "YEM", "reason": "Houthi conflict ongoing"}
+      ]
+    }
+  },
+  "ARE": {
+    "basic": {
+      "name": "United Arab Emirates",
+      "capital": "Abu Dhabi",
+      "region": "West Asia",
+      "government": "Federal absolute monarchy (federation of emirates)",
+      "languages": ["Arabic"],
+      "currency": "UAE Dirham (AED)"
+    },
+    "snapshot": {
+      "population": "10 million (89% expat)",
+      "gdp": "$515 billion",
+      "gdp_per_capita": "$51,500",
+      "economy_type": "Diversified: oil, finance, trade, tourism"
+    },
+    "identity": "Most successful Gulf diversification story. Global hub for trade, finance, and logistics. Aggressive foreign policy projecting influence from Africa to Yemen. Model of high-functioning authoritarian modernity.",
+    "strengths": ["Successful diversification beyond oil", "Global logistics hub (DP World, Emirates)", "Political stability", "Expat-driven productivity", "Sovereign wealth, AI investment push"],
+    "weaknesses": ["Citizen-expat population imbalance", "Regional conflict exposure", "Iran tensions", "Labor rights concerns", "Climate stress"],
+    "current_position": "Leveraging neutrality to benefit from sanctions regimes (Russian money, Iranian trade); aggressive AI and tech investment (G42); Abraham Accords with Israel holding despite Gaza; expanding African footprint.",
+    "history_brief": "Trucial States under British protection. Federation formed 1971 under Sheikh Zayed. Dubai diversification from 1990s. Abu Dhabi-led financial and industrial push. Abraham Accords with Israel 2020. Aggressive AI pivot under MBZ.",
+    "relationships": {
+      "allies": [
+        {"country": "SAU", "reason": "Core Gulf partner"},
+        {"country": "USA", "reason": "Major security partner, F-35 discussions"},
+        {"country": "ISR", "reason": "Abraham Accords, tech and defense ties"}
+      ],
+      "working": [
+        {"country": "IND", "reason": "CEPA trade deal, huge diaspora, investment"},
+        {"country": "CHN", "reason": "Trade hub, tech cooperation"},
+        {"country": "RUS", "reason": "Financial and logistical pragmatism"},
+        {"country": "FRA", "reason": "Defense partnership"},
+        {"country": "EGY", "reason": "Strategic alignment, investment"}
+      ],
+      "tensions": [
+        {"country": "IRN", "reason": "Regional rivalry despite trade ties"}
+      ]
+    }
+  },
+  "QAT": {
+    "basic": {
+      "name": "Qatar",
+      "capital": "Doha",
+      "region": "West Asia",
+      "government": "Absolute monarchy (emirate)",
+      "languages": ["Arabic"],
+      "currency": "Qatari Riyal (QAR)"
+    },
+    "snapshot": {
+      "population": "3 million (88% expat)",
+      "gdp": "$235 billion",
+      "gdp_per_capita": "$80,000",
+      "economy_type": "Natural gas-dominant, wealthy"
+    },
+    "identity": "Tiny gas-rich peninsula punching far above its weight diplomatically. Host of major US military base and independent foreign policy including ties with Iran, Hamas, and Taliban. Al Jazeera global media arm.",
+    "strengths": ["World's largest LNG exporter (with US)", "Massive sovereign wealth (QIA)", "Diplomatic agility and mediator role", "Al Jazeera soft power", "Al Udeid US base provides security"],
+    "weaknesses": ["Citizen-expat imbalance", "Small size", "Regional rivalries with Saudi/UAE", "Dependence on gas prices"],
+    "current_position": "Lead mediator in Gaza hostage talks; maintained Hamas political office; key to Afghanistan diplomacy; expanding LNG capacity with US; relations with Saudi/UAE normalized after 2017-21 blockade.",
+    "history_brief": "British protectorate, independent 1971. North Field gas discovered 1971 transformed country. 1995 palace coup installed reformist emir. 2017-21 blockade by Saudi/UAE over Iran ties and Muslim Brotherhood support. Hosted 2022 World Cup.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Major non-NATO ally, Al Udeid base"},
+        {"country": "TUR", "reason": "Strategic partnership, Turkish base"}
+      ],
+      "working": [
+        {"country": "SAU", "reason": "Post-blockade normalization"},
+        {"country": "ARE", "reason": "Post-blockade normalization"},
+        {"country": "IRN", "reason": "Shared North Field gas, pragmatic ties"},
+        {"country": "CHN", "reason": "Major LNG customer, investment"},
+        {"country": "EGY", "reason": "Investment, rebuilt ties"}
+      ],
+      "tensions": []
+    }
+  },
+  "KWT": {
+    "basic": {
+      "name": "Kuwait",
+      "capital": "Kuwait City",
+      "region": "West Asia",
+      "government": "Constitutional emirate (parliament suspended 2024)",
+      "languages": ["Arabic"],
+      "currency": "Kuwaiti Dinar (KWD)"
+    },
+    "snapshot": {
+      "population": "4.3 million",
+      "gdp": "$165 billion",
+      "gdp_per_capita": "$38,000",
+      "economy_type": "Oil-dominant, generous welfare"
+    },
+    "identity": "Oil-rich Gulf state historically more politically open than neighbors, with an elected parliament. Currently in constitutional pause as new emir suspended parliament in 2024.",
+    "strengths": ["Large oil reserves", "Sovereign wealth (KIA)", "Generous welfare system", "Strategic location"],
+    "weaknesses": ["Overwhelming oil dependence", "Diversification lag vs neighbors", "Political gridlock (pre-suspension)", "Public sector bloat", "Demographic imbalance"],
+    "current_position": "New emir suspended parliament and constitutional provisions in 2024 to push through reforms; maintaining US security ties; watching Iran-Iraq dynamics carefully.",
+    "history_brief": "Al-Sabah ruling family since 18th century. British protectorate. Independent 1961. Iraq invasion 1990, liberated by US-led coalition 1991. Parliamentary politics with frequent dissolutions. Sheikh Meshal suspended parliament May 2024.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Major non-NATO ally since 1991 liberation"},
+        {"country": "SAU", "reason": "Core Gulf partner"}
+      ],
+      "working": [
+        {"country": "CHN", "reason": "Oil customer, Silk City project"},
+        {"country": "IND", "reason": "Oil exports, large expat community"},
+        {"country": "GBR", "reason": "Historic ties, defense"}
+      ],
+      "tensions": [
+        {"country": "IRQ", "reason": "Residual from 1990 invasion, ongoing claims issues"}
+      ]
+    }
   }
 }
