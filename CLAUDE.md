@@ -1,0 +1,1938 @@
+# World Atlas — Build Specification
+
+You are building a personal-use interactive 3D globe that shows high-level country intelligence. User spins the globe, hovers for basics, clicks a country to open a side panel, and the globe recolors to show that country's diplomatic relationships.
+
+Owner: PK. This is a personal project, not a commercial product. Optimize for "interesting to open on a Sunday" over "comprehensive." Read this entire document before starting.
+
+---
+
+## 1. Hard constraints (do not violate)
+
+1. **Zero runtime cost.** Deployed to Vercel free tier. No database, no backend API, no paid services, no scheduled jobs, no trial-tier services. All data is static JSON committed to the repo.
+2. **No LLM calls at runtime, ever.** Do not add Anthropic, OpenAI, or any AI SDK. The narrative content in `data/countries.json` is human-curated.
+3. **Desktop-first.** Mobile should work but is not the optimization target.
+4. **Snapshot, not live.** The app reflects the world as of early 2026. No news feeds. No "last updated" live indicators. Static content only.
+5. **No auth, no accounts, no analytics in v1.**
+6. **Asia-only scope for v1.** The data file contains ~48 Asian countries. Other continents show the country name in hover but have no panel content (graceful empty state). Do not stub or fabricate data for non-Asian countries.
+
+---
+
+## 2. Stack (use exactly these, do not substitute)
+
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 14+ App Router |
+| Language | TypeScript strict mode |
+| Styling | TailwindCSS |
+| Globe | react-globe.gl (^2.37) |
+| Deploy | Vercel (auto-deploy from `main` branch) |
+
+No Redux, no Zustand. React Context + useState is sufficient.
+No CMS, no Supabase, no Firebase. JSON files only.
+No test framework for v1. Ship first.
+
+---
+
+## 3. Critical technical gotchas (read carefully)
+
+### 3.1 react-globe.gl requires dynamic import in Next.js
+
+`react-globe.gl` uses Three.js and accesses `window`. It crashes on SSR. You MUST import it dynamically with `ssr: false`:
+
+```tsx
+'use client';
+import dynamic from 'next/dynamic';
+
+const Globe = dynamic(() => import('react-globe.gl'), { ssr: false });
+```
+
+The component using `<Globe>` must have `'use client'` at the top. The page wrapping it can remain a server component.
+
+### 3.2 Natural Earth GeoJSON property names
+
+Download from:
+`https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson`
+
+Save to `/public/data/world-110m.geojson` and fetch at runtime (~250KB, acceptable).
+
+**The property for ISO alpha-3 is `ADM0_A3`, not `ISO_A3`.** `ISO_A3` contains `"-99"` for Kosovo, Northern Cyprus, Somaliland, etc., which breaks lookups. Use `ADM0_A3` throughout.
+
+Other useful properties: `NAME`, `NAME_LONG`, `POP_EST`, `CONTINENT`, `ISO_A2`.
+
+### 3.3 Flag emoji from ISO code
+
+Don't ship flag PNGs:
+
+```ts
+export function isoToFlagEmoji(iso2: string): string {
+  if (!iso2 || iso2.length !== 2 || iso2 === '-99') return '🏳️';
+  return iso2.toUpperCase().replace(/./g, c =>
+    String.fromCodePoint(127397 + c.charCodeAt(0))
+  );
+}
+```
+
+### 3.4 Color transitions
+
+Use `polygonsTransitionDuration={400}` on the Globe component. Color changes animate automatically when the `polygonCapColor` function's output changes.
+
+---
+
+## 4. File structure
+
+```
+world-atlas/
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx                    # Server component, renders <GlobeView />
+│   ├── globals.css                 # Tailwind + container styles
+│   └── favicon.ico
+├── components/
+│   ├── GlobeView.tsx               # 'use client' — holds selected state
+│   ├── Globe.tsx                   # Dynamic-imported react-globe.gl wrapper
+│   ├── CountryPanel.tsx            # Right-side slide-in with tabs
+│   ├── tabs/
+│   │   ├── OverviewTab.tsx
+│   │   ├── EconomyTab.tsx
+│   │   ├── PoliticsTab.tsx
+│   │   ├── HistoryTab.tsx
+│   │   ├── PositionTab.tsx
+│   │   └── RelationshipsTab.tsx
+│   ├── HoverTooltip.tsx
+│   └── Legend.tsx                  # Bottom-left color legend
+├── lib/
+│   ├── types.ts                    # CountryData types
+│   ├── colorMap.ts                 # Computes polygon color from selection
+│   └── flags.ts                    # isoToFlagEmoji utility
+├── data/
+│   └── countries.json              # The static data file (keyed by ADM0_A3)
+├── public/
+│   └── data/
+│       └── world-110m.geojson      # Natural Earth polygons
+├── .gitignore
+├── next.config.js
+├── tailwind.config.ts
+├── tsconfig.json
+├── package.json
+└── README.md
+```
+
+---
+
+## 5. Data schema
+
+### 5.1 Types (`lib/types.ts`)
+
+```ts
+export type Relationship = {
+  country: string;      // ISO alpha-3
+  reason: string;       // One-line explanation
+};
+
+export type CountryData = {
+  basic: {
+    name: string;
+    capital: string;
+    region: string;
+    government: string;
+    languages: string[];
+    currency: string;
+  };
+  snapshot: {
+    population: string;
+    gdp: string;
+    gdp_per_capita: string;
+    economy_type: string;
+  };
+  identity: string;
+  strengths: string[];
+  weaknesses: string[];
+  current_position: string;
+  history_brief: string;
+  relationships: {
+    allies: Relationship[];
+    working: Relationship[];
+    tensions: Relationship[];
+  };
+};
+
+export type CountriesData = Record<string, CountryData>;
+```
+
+### 5.2 Data file — `data/countries.json`
+
+Create `data/countries.json` with the full content below. This is real data for ~48 Asian countries generated as of early 2026. Use it exactly as provided.
+
+```json
+{
+  "IND": {
+    "basic": {
+      "name": "India",
+      "capital": "New Delhi",
+      "region": "South Asia",
+      "government": "Federal parliamentary republic",
+      "languages": ["Hindi", "English", "+21 official"],
+      "currency": "Indian Rupee (INR)"
+    },
+    "snapshot": {
+      "population": "1.43 billion",
+      "gdp": "$3.9 trillion (5th largest)",
+      "gdp_per_capita": "$2,700",
+      "economy_type": "Mixed, services-dominant"
+    },
+    "identity": "World's largest democracy and most populous nation. Rising economic and geopolitical power balancing Western alignment with strategic autonomy.",
+    "strengths": ["Demographic dividend", "IT services dominance", "Large domestic market", "Space and pharma capability", "English-speaking talent pool"],
+    "weaknesses": ["Infrastructure gaps", "Regional inequality", "Bureaucratic friction", "Air quality crisis", "Manufacturing still underweight"],
+    "current_position": "Positioning as alternative manufacturing hub to China; deepening US/QUAD ties while retaining Russia relationship; navigating border tensions with China and Pakistan.",
+    "history_brief": "Ancient civilization with continuous cultural lineage. Mughal empire 16th–18th centuries, British colonial rule 1858–1947. Independence 1947 under Nehru, with Partition creating Pakistan. Socialist-planned economy until 1991 liberalization unleashed growth. Tech boom from 2000s. Rising global power from 2010s.",
+    "relationships": {
+      "allies": [
+        {"country": "RUS", "reason": "Longstanding defense partnership, S-400 deals"},
+        {"country": "FRA", "reason": "Defense cooperation, Rafale jets, strategic partner"},
+        {"country": "ISR", "reason": "Defense tech collaboration"}
+      ],
+      "working": [
+        {"country": "USA", "reason": "QUAD, trade, tech, defense cooperation"},
+        {"country": "JPN", "reason": "QUAD, infrastructure, strategic partner"},
+        {"country": "AUS", "reason": "QUAD partner"},
+        {"country": "GBR", "reason": "Trade, diaspora, FTA negotiations"},
+        {"country": "DEU", "reason": "Trade and technology partnership"}
+      ],
+      "tensions": [
+        {"country": "PAK", "reason": "Kashmir dispute, terrorism concerns"},
+        {"country": "CHN", "reason": "Border disputes, LAC tensions, strategic rivalry"}
+      ]
+    }
+  },
+  "CHN": {
+    "basic": {
+      "name": "China",
+      "capital": "Beijing",
+      "region": "East Asia",
+      "government": "One-party socialist republic under CCP",
+      "languages": ["Mandarin Chinese"],
+      "currency": "Renminbi (CNY)"
+    },
+    "snapshot": {
+      "population": "1.41 billion",
+      "gdp": "$18.5 trillion (2nd largest)",
+      "gdp_per_capita": "$13,100",
+      "economy_type": "State capitalist, manufacturing-dominant"
+    },
+    "identity": "World's second-largest economy and primary peer competitor to the US. Civilization-state with Communist Party authority positioning itself as a global alternative to the liberal order.",
+    "strengths": ["Manufacturing scale unmatched globally", "Infrastructure", "State-directed strategic investment", "Technology (EVs, batteries, solar)", "Massive domestic market"],
+    "weaknesses": ["Demographic decline", "Property sector overhang", "Youth unemployment", "Capital flight risk", "Increasing international pushback"],
+    "current_position": "Navigating US decoupling pressure; tightening party control under Xi; pursuing tech self-sufficiency in semiconductors; expanding Belt and Road and diplomatic influence in Global South.",
+    "history_brief": "Millennia of dynastic rule. Qing collapse 1911, warlord era, civil war. PRC founded 1949 under Mao. Cultural Revolution 1966–76. Deng Xiaoping reforms from 1978 transformed economy. WTO accession 2001 accelerated growth. Xi Jinping consolidated power from 2012 onward.",
+    "relationships": {
+      "allies": [
+        {"country": "RUS", "reason": "No-limits partnership, energy trade, anti-US alignment"},
+        {"country": "PRK", "reason": "Treaty ally, buffer state"},
+        {"country": "PAK", "reason": "All-weather friendship, CPEC"}
+      ],
+      "working": [
+        {"country": "KAZ", "reason": "Energy, Belt and Road hub"},
+        {"country": "IRN", "reason": "Oil trade, strategic partnership"},
+        {"country": "SAU", "reason": "Oil trade, Beijing-brokered Iran deal"},
+        {"country": "BRA", "reason": "BRICS, largest trade partner"},
+        {"country": "DEU", "reason": "Major trade relationship despite friction"}
+      ],
+      "tensions": [
+        {"country": "USA", "reason": "Strategic rivalry, tech war, Taiwan"},
+        {"country": "IND", "reason": "Border disputes, strategic competition"},
+        {"country": "JPN", "reason": "Senkaku/Diaoyu islands, historical tensions"},
+        {"country": "PHL", "reason": "South China Sea disputes, Scarborough Shoal"},
+        {"country": "VNM", "reason": "South China Sea disputes"}
+      ]
+    }
+  },
+  "JPN": {
+    "basic": {
+      "name": "Japan",
+      "capital": "Tokyo",
+      "region": "East Asia",
+      "government": "Constitutional monarchy with parliamentary democracy",
+      "languages": ["Japanese"],
+      "currency": "Japanese Yen (JPY)"
+    },
+    "snapshot": {
+      "population": "124 million",
+      "gdp": "$4.2 trillion (4th largest)",
+      "gdp_per_capita": "$33,800",
+      "economy_type": "Developed, manufacturing and services"
+    },
+    "identity": "Advanced island nation and technological powerhouse. Post-war pacifist constitution slowly loosening as China's rise changes the neighborhood. Core US ally in Asia.",
+    "strengths": ["Advanced manufacturing and robotics", "Technology and R&D", "Social cohesion", "Quality infrastructure", "Strong global brands"],
+    "weaknesses": ["Aging and shrinking population", "Stagnant wage growth", "High public debt", "Rigid corporate culture", "Energy import dependence"],
+    "current_position": "Rearming in response to China and North Korea; deepening QUAD and US alliance; hosting more US military capacity; diversifying supply chains away from China.",
+    "history_brief": "Feudal shogunate era, Meiji Restoration 1868 modernized rapidly. Imperial expansion led to WWII defeat. US occupation and pacifist constitution 1947. Economic miracle through 1980s. Lost decades of stagnation from 1990s. Abenomics revival attempt from 2012. Now shifting toward strategic activism.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Security treaty, core military ally"},
+        {"country": "AUS", "reason": "QUAD, reciprocal access agreement"},
+        {"country": "GBR", "reason": "Defense partnership, GCAP fighter program"}
+      ],
+      "working": [
+        {"country": "IND", "reason": "QUAD, infrastructure cooperation"},
+        {"country": "KOR", "reason": "Recent rapprochement, trilateral US summits"},
+        {"country": "DEU", "reason": "Tech and industrial partnership"},
+        {"country": "FRA", "reason": "Defense and tech cooperation"},
+        {"country": "PHL", "reason": "Growing defense ties, shared China concerns"}
+      ],
+      "tensions": [
+        {"country": "CHN", "reason": "Senkaku islands, historical and strategic rivalry"},
+        {"country": "PRK", "reason": "Missile threats, abductions issue"},
+        {"country": "RUS", "reason": "Northern Territories dispute, post-Ukraine freeze"}
+      ]
+    }
+  },
+  "KOR": {
+    "basic": {
+      "name": "South Korea",
+      "capital": "Seoul",
+      "region": "East Asia",
+      "government": "Presidential republic",
+      "languages": ["Korean"],
+      "currency": "South Korean Won (KRW)"
+    },
+    "snapshot": {
+      "population": "51.7 million",
+      "gdp": "$1.7 trillion (13th largest)",
+      "gdp_per_capita": "$33,100",
+      "economy_type": "Developed, export-driven manufacturing"
+    },
+    "identity": "Advanced democracy that transformed from war-torn poverty to high-tech exporter in two generations. Semiconductor, automotive, and cultural (K-pop, cinema) powerhouse living under permanent North Korean shadow.",
+    "strengths": ["Semiconductor leadership (Samsung, SK Hynix)", "Automotive (Hyundai-Kia)", "Cultural exports (Hallyu)", "Fast, cohesive execution", "R&D intensity"],
+    "weaknesses": ["Demographic collapse (lowest fertility globally)", "Chaebol concentration", "Dependence on China trade", "Permanent NK security risk", "Housing unaffordability"],
+    "current_position": "Tilting decisively toward US and Japan under recent administrations; squeezed between US semiconductor restrictions on China and Chinese market exposure; building nuclear latency debate.",
+    "history_brief": "Japanese colonial rule 1910–45. Division and Korean War 1950–53. Military dictatorships through 1987. Democratization and economic takeoff. IMF crisis 1997, rapid recovery. Now a developed high-tech democracy with ongoing NK confrontation.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Mutual defense treaty, troops stationed"},
+        {"country": "JPN", "reason": "Trilateral cooperation with US, shared concerns"}
+      ],
+      "working": [
+        {"country": "AUS", "reason": "Defense and minerals cooperation"},
+        {"country": "VNM", "reason": "Major manufacturing base, strategic partner"},
+        {"country": "IND", "reason": "Growing tech and trade partnership"},
+        {"country": "GBR", "reason": "Trade and tech partnership"},
+        {"country": "DEU", "reason": "Industrial and auto cooperation"}
+      ],
+      "tensions": [
+        {"country": "PRK", "reason": "Existential security threat, nuclear program"},
+        {"country": "CHN", "reason": "THAAD fallout, tech restrictions pressure"},
+        {"country": "RUS", "reason": "Post-Ukraine cooling, NK arms ties"}
+      ]
+    }
+  },
+  "PRK": {
+    "basic": {
+      "name": "North Korea",
+      "capital": "Pyongyang",
+      "region": "East Asia",
+      "government": "Totalitarian one-party state under Kim dynasty",
+      "languages": ["Korean"],
+      "currency": "North Korean Won (KPW)"
+    },
+    "snapshot": {
+      "population": "26 million",
+      "gdp": "~$30 billion (estimated)",
+      "gdp_per_capita": "~$1,200 (estimated)",
+      "economy_type": "Command economy with black markets"
+    },
+    "identity": "The world's most isolated state. Nuclear-armed totalitarian dynasty under Kim Jong Un. Economy sustained by sanctions evasion and China/Russia backing.",
+    "strengths": ["Nuclear deterrent", "Unified command authority", "Population compliance through total control", "Cyber operations capability"],
+    "weaknesses": ["Chronic food insecurity", "Energy shortages", "Sanctions isolation", "Primitive civilian economy", "Extreme dependence on China"],
+    "current_position": "Providing artillery and missiles to Russia for Ukraine war in exchange for tech and energy; accelerating nuclear and missile programs; rejecting any US dialogue on denuclearization.",
+    "history_brief": "Soviet-installed Kim Il Sung regime post-1945. Korean War 1950–53. Kim dynasty succession: Kim Jong Il (1994), Kim Jong Un (2011). Nuclear tests from 2006. Brief Trump-Kim engagement 2018–19 collapsed. Deepening Russia alignment since 2022.",
+    "relationships": {
+      "allies": [
+        {"country": "CHN", "reason": "Treaty ally, primary economic lifeline"},
+        {"country": "RUS", "reason": "Arms for Ukraine war, expanding strategic ties"}
+      ],
+      "working": [
+        {"country": "IRN", "reason": "Missile technology exchange, anti-US alignment"}
+      ],
+      "tensions": [
+        {"country": "USA", "reason": "Nuclear standoff, sanctions"},
+        {"country": "KOR", "reason": "Existential rivalry"},
+        {"country": "JPN", "reason": "Missile overflights, abductions"}
+      ]
+    }
+  },
+  "MNG": {
+    "basic": {
+      "name": "Mongolia",
+      "capital": "Ulaanbaatar",
+      "region": "East Asia",
+      "government": "Semi-presidential republic",
+      "languages": ["Mongolian"],
+      "currency": "Mongolian Tögrög (MNT)"
+    },
+    "snapshot": {
+      "population": "3.5 million",
+      "gdp": "$19 billion",
+      "gdp_per_capita": "$5,400",
+      "economy_type": "Mining-driven, developing"
+    },
+    "identity": "Vast, sparsely populated landlocked democracy sandwiched between China and Russia. Pursues 'third neighbor' foreign policy courting the US, Japan, and EU to balance its giant neighbors.",
+    "strengths": ["Mineral wealth (copper, coal, rare earths)", "Functioning democracy in tough neighborhood", "Strategic third-neighbor diplomacy", "Young population"],
+    "weaknesses": ["Extreme dependence on China for exports", "Harsh climate shocks ('dzud')", "Corruption", "Small domestic market", "Landlocked"],
+    "current_position": "Benefiting from Western interest in non-China critical minerals; balancing pressure from Russia and China while deepening US and Japanese ties.",
+    "history_brief": "Mongol Empire under Genghis Khan 13th century. Qing rule, independence 1911. Soviet satellite 1924–90. Peaceful democratic transition 1990. Mining boom 2010s followed by volatility. Actively cultivating third-neighbor partners.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "USA", "reason": "Strategic third neighbor, minerals cooperation"},
+        {"country": "JPN", "reason": "Strategic partner, aid and investment"},
+        {"country": "KOR", "reason": "Trade and labor migration"},
+        {"country": "DEU", "reason": "Mining and education partnership"},
+        {"country": "CHN", "reason": "Dominant trade partner despite wariness"},
+        {"country": "RUS", "reason": "Energy, transit, historical ties"}
+      ],
+      "tensions": []
+    }
+  },
+  "TWN": {
+    "basic": {
+      "name": "Taiwan",
+      "capital": "Taipei",
+      "region": "East Asia",
+      "government": "Semi-presidential democratic republic",
+      "languages": ["Mandarin Chinese", "Taiwanese Hokkien"],
+      "currency": "New Taiwan Dollar (TWD)"
+    },
+    "snapshot": {
+      "population": "23.4 million",
+      "gdp": "$760 billion",
+      "gdp_per_capita": "$32,500",
+      "economy_type": "Developed, semiconductor-dominant"
+    },
+    "identity": "Self-governing democracy that China claims as its territory. Home to TSMC, the world's most important semiconductor manufacturer. A single flashpoint that could reshape the global economy and trigger great-power war.",
+    "strengths": ["TSMC and semiconductor ecosystem", "Vibrant democracy", "High-tech manufacturing", "Skilled workforce", "Deep US implicit backing"],
+    "weaknesses": ["Constant PRC military pressure", "Diplomatic isolation (only ~13 formal recognitions)", "Energy import dependence", "Aging population", "Domestic political polarization"],
+    "current_position": "Building asymmetric defense and societal resilience against Chinese coercion; deepening informal security ties with US, Japan, and Europe; TSMC globalizing fabs to US, Japan, Germany under pressure.",
+    "history_brief": "Qing, then Japanese colony 1895–1945. ROC government retreated here after 1949 civil war defeat. Martial law until 1987. Democratization from 1990s. First non-KMT president 2000. Economic miracle centered on electronics then semiconductors. PRC pressure intensifying since 2016.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Taiwan Relations Act, primary security backer"}
+      ],
+      "working": [
+        {"country": "JPN", "reason": "Strong informal ties, shared China concerns"},
+        {"country": "DEU", "reason": "TSMC Dresden fab, trade"},
+        {"country": "CZE", "reason": "One of few European countries with active engagement"},
+        {"country": "LTU", "reason": "Opened trade office under Taiwan name"}
+      ],
+      "tensions": [
+        {"country": "CHN", "reason": "Sovereignty claim, military coercion, existential threat"}
+      ]
+    }
+  },
+  "PAK": {
+    "basic": {
+      "name": "Pakistan",
+      "capital": "Islamabad",
+      "region": "South Asia",
+      "government": "Federal parliamentary republic (military-influenced)",
+      "languages": ["Urdu", "English"],
+      "currency": "Pakistani Rupee (PKR)"
+    },
+    "snapshot": {
+      "population": "241 million",
+      "gdp": "$375 billion",
+      "gdp_per_capita": "$1,550",
+      "economy_type": "Developing, agriculture and textiles"
+    },
+    "identity": "Nuclear-armed Muslim-majority state with a powerful military that shapes politics and foreign policy. Deep structural partner of China and rival of India. Chronically on the edge of economic crisis.",
+    "strengths": ["Nuclear deterrent", "Large youth population", "Strategic location", "CPEC infrastructure investment", "Disciplined military"],
+    "weaknesses": ["Recurring IMF bailouts", "Civilian-military imbalance", "Terrorism and TTP resurgence", "Energy crisis", "Water stress", "Low export base"],
+    "current_position": "Navigating severe economic crisis with IMF support; deepening China dependence; tense relations with Afghan Taliban and rising TTP violence; India relations frozen.",
+    "history_brief": "Created 1947 at Partition. Three wars with India. Bangladesh broke away 1971. Nuclear tests 1998. Alternating civilian and military rule (Musharraf 1999–2008). Post-2001 frontline in US War on Terror. Deepened China alignment via CPEC from 2015.",
+    "relationships": {
+      "allies": [
+        {"country": "CHN", "reason": "All-weather friendship, CPEC, defense"},
+        {"country": "SAU", "reason": "Financial lifeline, religious ties"},
+        {"country": "TUR", "reason": "Defense and diplomatic alignment"}
+      ],
+      "working": [
+        {"country": "USA", "reason": "Complicated but transactional, IMF influence"},
+        {"country": "ARE", "reason": "Diaspora, investment"},
+        {"country": "RUS", "reason": "Growing ties, energy"}
+      ],
+      "tensions": [
+        {"country": "IND", "reason": "Kashmir, wars, existential rivalry"},
+        {"country": "AFG", "reason": "TTP safe havens, border disputes"}
+      ]
+    }
+  },
+  "BGD": {
+    "basic": {
+      "name": "Bangladesh",
+      "capital": "Dhaka",
+      "region": "South Asia",
+      "government": "Parliamentary republic (interim government)",
+      "languages": ["Bengali"],
+      "currency": "Bangladeshi Taka (BDT)"
+    },
+    "snapshot": {
+      "population": "173 million",
+      "gdp": "$460 billion",
+      "gdp_per_capita": "$2,660",
+      "economy_type": "Developing, garment manufacturing-driven"
+    },
+    "identity": "Densely populated delta nation and the world's second-largest garment exporter. Underwent dramatic political rupture in 2024 with the ouster of Sheikh Hasina; now navigating transition under interim leadership.",
+    "strengths": ["Garment and textile manufacturing scale", "Remittance inflows", "Rapid poverty reduction", "Young workforce", "Recent major infrastructure (Padma Bridge)"],
+    "weaknesses": ["Climate and flood vulnerability", "Recent political instability", "Banking sector stress", "Over-reliance on garments", "Rohingya refugee burden"],
+    "current_position": "Interim government under Muhammad Yunus managing post-Hasina transition; recalibrating relations with India (which backed Hasina) while maintaining ties with China; preparing for elections.",
+    "history_brief": "East Pakistan until 1971 liberation war (Indian military support). Assassinations and military coups. Democracy restored 1990. BNP and Awami League alternated until Sheikh Hasina's extended rule 2009–2024. Student-led uprising toppled her August 2024. Now in transition.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Major investor, infrastructure, defense supplier"},
+        {"country": "IND", "reason": "Complex: major trade partner, recently tense post-Hasina"},
+        {"country": "USA", "reason": "Garment export market, democracy pressure"},
+        {"country": "JPN", "reason": "Aid and infrastructure"},
+        {"country": "SAU", "reason": "Remittance source, religious ties"}
+      ],
+      "tensions": [
+        {"country": "MMR", "reason": "Rohingya refugee crisis, border issues"}
+      ]
+    }
+  },
+  "LKA": {
+    "basic": {
+      "name": "Sri Lanka",
+      "capital": "Colombo (commercial), Sri Jayawardenepura Kotte (legislative)",
+      "region": "South Asia",
+      "government": "Presidential republic",
+      "languages": ["Sinhala", "Tamil"],
+      "currency": "Sri Lankan Rupee (LKR)"
+    },
+    "snapshot": {
+      "population": "21.9 million",
+      "gdp": "$90 billion",
+      "gdp_per_capita": "$4,100",
+      "economy_type": "Developing, services and tourism"
+    },
+    "identity": "Island nation recovering from catastrophic 2022 economic collapse. Strategic location in Indian Ocean makes it contested ground between India and China.",
+    "strengths": ["Strategic maritime location", "Tourism potential", "Educated workforce", "Tea and apparel exports"],
+    "weaknesses": ["Debt crisis fallout", "Ethnic tensions legacy", "Dependence on IMF program", "Political instability", "Capital flight"],
+    "current_position": "Under IMF bailout program; restructuring sovereign debt including to Chinese creditors; new leftist-led government under Dissanayake balancing India and China; rebuilding tourism.",
+    "history_brief": "Colonial rule (Portuguese, Dutch, British) until 1948 independence. 26-year Tamil civil war ended 2009. Rajapaksa family dominance. Chinese-financed Hambantota port leased out 2017 after debt troubles. Economic collapse 2022 forced president to flee. New political era under NPP government from 2024.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "IND", "reason": "Neighbor, bailout support, strategic concerns"},
+        {"country": "CHN", "reason": "Major creditor and investor, port infrastructure"},
+        {"country": "JPN", "reason": "Aid, infrastructure, creditor"},
+        {"country": "USA", "reason": "IMF support, trade"}
+      ],
+      "tensions": []
+    }
+  },
+  "NPL": {
+    "basic": {
+      "name": "Nepal",
+      "capital": "Kathmandu",
+      "region": "South Asia",
+      "government": "Federal parliamentary republic",
+      "languages": ["Nepali"],
+      "currency": "Nepalese Rupee (NPR)"
+    },
+    "snapshot": {
+      "population": "30.5 million",
+      "gdp": "$44 billion",
+      "gdp_per_capita": "$1,440",
+      "economy_type": "Developing, remittance-dependent"
+    },
+    "identity": "Himalayan republic wedged between India and China. Chronic political instability with frequent government changes. Remittances from migrant workers keep the economy afloat.",
+    "strengths": ["Hydropower potential", "Tourism (Everest, Buddhist heritage)", "Strategic buffer position", "Large diaspora remittances"],
+    "weaknesses": ["Political instability (frequent PM changes)", "Earthquake vulnerability", "Landlocked, infrastructure gaps", "Heavy remittance dependence", "Youth outmigration"],
+    "current_position": "Balancing India (open border, cultural ties) and China (infrastructure, BRI member); hydropower export deals with India; periodic territorial frictions over Kalapani region.",
+    "history_brief": "Unified in 18th century under Shah dynasty. Rana autocracy. Constitutional monarchy. Maoist insurgency 1996–2006 killed ~17,000. Monarchy abolished 2008, federal republic established 2015. Revolving-door coalitions since.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "IND", "reason": "Open border, dominant trade partner, cultural ties"},
+        {"country": "CHN", "reason": "BRI investment, infrastructure, counterweight"},
+        {"country": "USA", "reason": "MCC compact, aid"},
+        {"country": "GBR", "reason": "Historical ties, Gurkha connection"}
+      ],
+      "tensions": []
+    }
+  },
+  "BTN": {
+    "basic": {
+      "name": "Bhutan",
+      "capital": "Thimphu",
+      "region": "South Asia",
+      "government": "Constitutional monarchy",
+      "languages": ["Dzongkha"],
+      "currency": "Bhutanese Ngultrum (BTN)"
+    },
+    "snapshot": {
+      "population": "780,000",
+      "gdp": "$3 billion",
+      "gdp_per_capita": "$3,850",
+      "economy_type": "Small, hydropower and tourism"
+    },
+    "identity": "Small Himalayan kingdom known for Gross National Happiness philosophy. Deeply aligned with India for security and economy. No formal diplomatic ties with China despite shared border.",
+    "strengths": ["Hydropower exports to India", "High-value low-volume tourism", "Political stability", "Environmental protection", "Strong national identity"],
+    "weaknesses": ["Tiny domestic market", "Heavy India dependence", "Youth unemployment", "Emigration of skilled workers", "Narrow economic base"],
+    "current_position": "Quietly negotiating border demarcation with China; expanding Gelephu Mindfulness City project; maintaining close India security partnership amid Chinese pressure.",
+    "history_brief": "Unified in 17th century. Treaty with British India 1910. Treaty with independent India 1949. Monarchy introduced democracy in 2008. Fourth king's GNH philosophy globally influential. Fifth king now on throne.",
+    "relationships": {
+      "allies": [
+        {"country": "IND", "reason": "Security treaty, dominant economic partner"}
+      ],
+      "working": [
+        {"country": "BGD", "reason": "Hydropower potential, trade"},
+        {"country": "JPN", "reason": "Aid and development support"}
+      ],
+      "tensions": [
+        {"country": "CHN", "reason": "Unresolved border, no formal ties"}
+      ]
+    }
+  },
+  "MDV": {
+    "basic": {
+      "name": "Maldives",
+      "capital": "Malé",
+      "region": "South Asia",
+      "government": "Presidential republic",
+      "languages": ["Dhivehi"],
+      "currency": "Maldivian Rufiyaa (MVR)"
+    },
+    "snapshot": {
+      "population": "520,000",
+      "gdp": "$7 billion",
+      "gdp_per_capita": "$13,500",
+      "economy_type": "Tourism-dependent, small"
+    },
+    "identity": "Tiny Indian Ocean archipelago strategically contested by India and China. Luxury tourism drives the economy. Climate change is an existential threat to its low-lying islands.",
+    "strengths": ["Luxury tourism brand", "Strategic Indian Ocean location", "Marine resources"],
+    "weaknesses": ["Extreme climate vulnerability", "Tourism concentration risk", "Rising public debt", "Political polarization", "Import dependence"],
+    "current_position": "Under Muizzu government, tilting toward China and away from India ('India Out' policy); reducing Indian military presence; deepening Chinese investment and infrastructure.",
+    "history_brief": "Sultanate for centuries. British protectorate 1887–1965. Republic 1968. Gayoom authoritarian rule 1978–2008. Democratic transitions since with frequent reversals. Gradual China alignment accelerated under Muizzu from 2023.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Growing preferred partner under current government"},
+        {"country": "IND", "reason": "Historic partner, now strained but still major"},
+        {"country": "SAU", "reason": "Religious ties, investment"},
+        {"country": "TUR", "reason": "Growing cooperation"}
+      ],
+      "tensions": []
+    }
+  },
+  "AFG": {
+    "basic": {
+      "name": "Afghanistan",
+      "capital": "Kabul",
+      "region": "South Asia",
+      "government": "Islamic Emirate under Taliban",
+      "languages": ["Pashto", "Dari"],
+      "currency": "Afghan Afghani (AFN)"
+    },
+    "snapshot": {
+      "population": "42 million",
+      "gdp": "$16 billion",
+      "gdp_per_capita": "$380",
+      "economy_type": "Collapsed formal economy, aid and opium"
+    },
+    "identity": "Landlocked South-Central Asian state under Taliban rule since August 2021. Unrecognized by any major power. Humanitarian crisis with severe restrictions on women's rights.",
+    "strengths": ["Mineral wealth (largely unexploited)", "Strategic location", "Cohesive Taliban command after takeover"],
+    "weaknesses": ["International isolation and sanctions", "Humanitarian crisis, aid dependent", "Women's rights collapse", "Frozen central bank reserves", "ISKP insurgency"],
+    "current_position": "Taliban consolidating rule without international recognition; tensions with Pakistan over TTP; cautious engagement from China, Russia, and regional states; severe gender apartheid.",
+    "history_brief": "Great Game buffer state. Soviet invasion 1979–89. Civil war, Taliban takeover 1996. US-led invasion 2001 after 9/11. 20-year republic collapsed August 2021 as US withdrew. Taliban back in power.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Pragmatic engagement, minerals, BRI interest"},
+        {"country": "RUS", "reason": "Diplomatic engagement, regional stability"},
+        {"country": "QAT", "reason": "Diplomatic intermediary"},
+        {"country": "IRN", "reason": "Complex neighbor engagement"}
+      ],
+      "tensions": [
+        {"country": "PAK", "reason": "TTP sheltering disputes, border clashes"},
+        {"country": "USA", "reason": "Sanctions, frozen assets"}
+      ]
+    }
+  },
+  "IRN": {
+    "basic": {
+      "name": "Iran",
+      "capital": "Tehran",
+      "region": "West Asia",
+      "government": "Islamic theocratic republic",
+      "languages": ["Persian"],
+      "currency": "Iranian Rial (IRR)"
+    },
+    "snapshot": {
+      "population": "89 million",
+      "gdp": "$400 billion (sanctions-affected)",
+      "gdp_per_capita": "$4,500",
+      "economy_type": "Oil and gas, state-dominated, sanctioned"
+    },
+    "identity": "Shia theocracy and regional power projecting influence through proxies across the Middle East. In direct confrontation with Israel, US, and Arab rivals. Near-threshold nuclear state.",
+    "strengths": ["Oil and gas reserves (vast)", "Regional proxy network (Axis of Resistance)", "Educated population", "Missile and drone capability", "Strategic geography"],
+    "weaknesses": ["Sanctions-crippled economy", "Unpopular regime, protest waves", "Brain drain", "Proxy network degraded by Israel", "Currency collapse"],
+    "current_position": "Regional position severely weakened after Israeli campaigns against Hamas, Hezbollah, and direct strikes on Iran; Assad fall in Syria cut Hezbollah supply lines; nuclear program decisions looming; domestic protests recurring.",
+    "history_brief": "Persian Empire. Constitutional Revolution 1906. Pahlavi dynasty, CIA-backed coup 1953 restored Shah. Islamic Revolution 1979 under Khomeini. Iran-Iraq War 1980–88. Nuclear deal 2015, US withdrawal 2018. Mahsa Amini protests 2022. Regional setbacks 2023–25.",
+    "relationships": {
+      "allies": [
+        {"country": "RUS", "reason": "Strategic partnership, drone supply, anti-US alignment"},
+        {"country": "CHN", "reason": "Oil customer, strategic partnership"},
+        {"country": "SYR", "reason": "Historic ally, though weakened by Assad fall"}
+      ],
+      "working": [
+        {"country": "IRQ", "reason": "Influence through Shia political forces"},
+        {"country": "VEN", "reason": "Anti-US solidarity, oil cooperation"},
+        {"country": "PRK", "reason": "Missile tech exchange"}
+      ],
+      "tensions": [
+        {"country": "USA", "reason": "Sanctions, proxy conflicts, nuclear standoff"},
+        {"country": "ISR", "reason": "Direct military confrontation, existential rivalry"},
+        {"country": "SAU", "reason": "Sectarian rivalry despite recent normalization"}
+      ]
+    }
+  },
+  "IRQ": {
+    "basic": {
+      "name": "Iraq",
+      "capital": "Baghdad",
+      "region": "West Asia",
+      "government": "Federal parliamentary republic",
+      "languages": ["Arabic", "Kurdish"],
+      "currency": "Iraqi Dinar (IQD)"
+    },
+    "snapshot": {
+      "population": "46 million",
+      "gdp": "$265 billion",
+      "gdp_per_capita": "$5,800",
+      "economy_type": "Oil-dominant, rentier state"
+    },
+    "identity": "Post-Saddam democracy with oil wealth but deep Iranian influence through Shia militias and political parties. Struggling to assert sovereignty between US and Iranian pressure.",
+    "strengths": ["Oil reserves (top 5 globally)", "Young population", "Strategic location", "Improving stability post-ISIS"],
+    "weaknesses": ["Iranian influence and militia power", "Corruption", "Sectarian tensions", "Infrastructure decay", "Oil dependence", "Kurdistan autonomy friction"],
+    "current_position": "Pressuring US troops to withdraw while maintaining security cooperation; balancing Iran and Gulf states; rebuilding after ISIS; Kurdistan Regional Government tensions over oil revenue.",
+    "history_brief": "Ottoman territory, British mandate post-WWI. Monarchy overthrown 1958. Ba'ath Party, Saddam Hussein 1979–2003. US invasion 2003, Saddam executed 2006. Sectarian civil war, ISIS takeover 2014, defeated 2017. Gradual stabilization since.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "IRN", "reason": "Deep influence through Shia politics and militias"},
+        {"country": "USA", "reason": "Security cooperation despite tensions"},
+        {"country": "TUR", "reason": "Trade partner, tensions over PKK"},
+        {"country": "SAU", "reason": "Rapprochement, investment"},
+        {"country": "CHN", "reason": "Oil customer, infrastructure"}
+      ],
+      "tensions": [
+        {"country": "ISR", "reason": "Hostile, militia attacks in solidarity with Gaza"}
+      ]
+    }
+  },
+  "SAU": {
+    "basic": {
+      "name": "Saudi Arabia",
+      "capital": "Riyadh",
+      "region": "West Asia",
+      "government": "Absolute monarchy",
+      "languages": ["Arabic"],
+      "currency": "Saudi Riyal (SAR)"
+    },
+    "snapshot": {
+      "population": "36 million",
+      "gdp": "$1.1 trillion",
+      "gdp_per_capita": "$32,500",
+      "economy_type": "Oil-dominant, diversifying"
+    },
+    "identity": "Wealthy Gulf monarchy and Islam's holiest site. Under Crown Prince Mohammed bin Salman, pursuing aggressive economic diversification (Vision 2030) while reshaping regional politics.",
+    "strengths": ["Vast oil reserves and spare capacity", "Sovereign wealth (PIF)", "Religious prestige (Mecca/Medina)", "US security umbrella", "Political centralization enabling fast action"],
+    "weaknesses": ["Oil price exposure", "Youth unemployment", "Human rights record", "Vision 2030 execution risks", "Yemen war costs"],
+    "current_position": "Balancing US alliance with China engagement and Russia cooperation on oil; normalizing with Iran (China-brokered 2023); cautious Israel normalization on hold due to Gaza; megaprojects (NEOM, Red Sea) in execution.",
+    "history_brief": "Founded 1932 by Ibn Saud unifying Arabian Peninsula. US alliance from 1945 (oil for security). Oil nationalization 1970s. Wahhabi religious establishment influential. MBS rise from 2015 centralized power and accelerated reforms. Khashoggi murder 2018. Vision 2030 ongoing.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Security partnership, though more transactional"},
+        {"country": "ARE", "reason": "Core Gulf partner"},
+        {"country": "BHR", "reason": "Close political alignment"},
+        {"country": "EGY", "reason": "Financial support, strategic alignment"}
+      ],
+      "working": [
+        {"country": "CHN", "reason": "Largest oil customer, tech and investment"},
+        {"country": "RUS", "reason": "OPEC+ coordination"},
+        {"country": "IND", "reason": "Major oil, trade and investment partner"},
+        {"country": "PAK", "reason": "Religious and financial ties, security"},
+        {"country": "IRN", "reason": "Normalized 2023, cautious engagement"}
+      ],
+      "tensions": [
+        {"country": "YEM", "reason": "Houthi conflict ongoing"}
+      ]
+    }
+  },
+  "ARE": {
+    "basic": {
+      "name": "United Arab Emirates",
+      "capital": "Abu Dhabi",
+      "region": "West Asia",
+      "government": "Federal absolute monarchy (federation of emirates)",
+      "languages": ["Arabic"],
+      "currency": "UAE Dirham (AED)"
+    },
+    "snapshot": {
+      "population": "10 million (89% expat)",
+      "gdp": "$515 billion",
+      "gdp_per_capita": "$51,500",
+      "economy_type": "Diversified: oil, finance, trade, tourism"
+    },
+    "identity": "Most successful Gulf diversification story. Global hub for trade, finance, and logistics. Aggressive foreign policy projecting influence from Africa to Yemen. Model of high-functioning authoritarian modernity.",
+    "strengths": ["Successful diversification beyond oil", "Global logistics hub (DP World, Emirates)", "Political stability", "Expat-driven productivity", "Sovereign wealth, AI investment push"],
+    "weaknesses": ["Citizen-expat population imbalance", "Regional conflict exposure", "Iran tensions", "Labor rights concerns", "Climate stress"],
+    "current_position": "Leveraging neutrality to benefit from sanctions regimes (Russian money, Iranian trade); aggressive AI and tech investment (G42); Abraham Accords with Israel holding despite Gaza; expanding African footprint.",
+    "history_brief": "Trucial States under British protection. Federation formed 1971 under Sheikh Zayed. Dubai diversification from 1990s. Abu Dhabi-led financial and industrial push. Abraham Accords with Israel 2020. Aggressive AI pivot under MBZ.",
+    "relationships": {
+      "allies": [
+        {"country": "SAU", "reason": "Core Gulf partner"},
+        {"country": "USA", "reason": "Major security partner, F-35 discussions"},
+        {"country": "ISR", "reason": "Abraham Accords, tech and defense ties"}
+      ],
+      "working": [
+        {"country": "IND", "reason": "CEPA trade deal, huge diaspora, investment"},
+        {"country": "CHN", "reason": "Trade hub, tech cooperation"},
+        {"country": "RUS", "reason": "Financial and logistical pragmatism"},
+        {"country": "FRA", "reason": "Defense partnership"},
+        {"country": "EGY", "reason": "Strategic alignment, investment"}
+      ],
+      "tensions": [
+        {"country": "IRN", "reason": "Regional rivalry despite trade ties"}
+      ]
+    }
+  },
+  "QAT": {
+    "basic": {
+      "name": "Qatar",
+      "capital": "Doha",
+      "region": "West Asia",
+      "government": "Absolute monarchy (emirate)",
+      "languages": ["Arabic"],
+      "currency": "Qatari Riyal (QAR)"
+    },
+    "snapshot": {
+      "population": "3 million (88% expat)",
+      "gdp": "$235 billion",
+      "gdp_per_capita": "$80,000",
+      "economy_type": "Natural gas-dominant, wealthy"
+    },
+    "identity": "Tiny gas-rich peninsula punching far above its weight diplomatically. Host of major US military base and independent foreign policy including ties with Iran, Hamas, and Taliban. Al Jazeera global media arm.",
+    "strengths": ["World's largest LNG exporter (with US)", "Massive sovereign wealth (QIA)", "Diplomatic agility and mediator role", "Al Jazeera soft power", "Al Udeid US base provides security"],
+    "weaknesses": ["Citizen-expat imbalance", "Small size", "Regional rivalries with Saudi/UAE", "Dependence on gas prices"],
+    "current_position": "Lead mediator in Gaza hostage talks; maintained Hamas political office; key to Afghanistan diplomacy; expanding LNG capacity with US; relations with Saudi/UAE normalized after 2017-21 blockade.",
+    "history_brief": "British protectorate, independent 1971. North Field gas discovered 1971 transformed country. 1995 palace coup installed reformist emir. 2017-21 blockade by Saudi/UAE over Iran ties and Muslim Brotherhood support. Hosted 2022 World Cup.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Major non-NATO ally, Al Udeid base"},
+        {"country": "TUR", "reason": "Strategic partnership, Turkish base"}
+      ],
+      "working": [
+        {"country": "SAU", "reason": "Post-blockade normalization"},
+        {"country": "ARE", "reason": "Post-blockade normalization"},
+        {"country": "IRN", "reason": "Shared North Field gas, pragmatic ties"},
+        {"country": "CHN", "reason": "Major LNG customer, investment"},
+        {"country": "EGY", "reason": "Investment, rebuilt ties"}
+      ],
+      "tensions": []
+    }
+  },
+  "KWT": {
+    "basic": {
+      "name": "Kuwait",
+      "capital": "Kuwait City",
+      "region": "West Asia",
+      "government": "Constitutional emirate (parliament suspended 2024)",
+      "languages": ["Arabic"],
+      "currency": "Kuwaiti Dinar (KWD)"
+    },
+    "snapshot": {
+      "population": "4.3 million",
+      "gdp": "$165 billion",
+      "gdp_per_capita": "$38,000",
+      "economy_type": "Oil-dominant, generous welfare"
+    },
+    "identity": "Oil-rich Gulf state historically more politically open than neighbors, with an elected parliament. Currently in constitutional pause as new emir suspended parliament in 2024.",
+    "strengths": ["Large oil reserves", "Sovereign wealth (KIA)", "Generous welfare system", "Strategic location"],
+    "weaknesses": ["Overwhelming oil dependence", "Diversification lag vs neighbors", "Political gridlock (pre-suspension)", "Public sector bloat", "Demographic imbalance"],
+    "current_position": "New emir suspended parliament and constitutional provisions in 2024 to push through reforms; maintaining US security ties; watching Iran-Iraq dynamics carefully.",
+    "history_brief": "Al-Sabah ruling family since 18th century. British protectorate. Independent 1961. Iraq invasion 1990, liberated by US-led coalition 1991. Parliamentary politics with frequent dissolutions. Sheikh Meshal suspended parliament May 2024.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Major non-NATO ally since 1991 liberation"},
+        {"country": "SAU", "reason": "Core Gulf partner"}
+      ],
+      "working": [
+        {"country": "CHN", "reason": "Oil customer, Silk City project"},
+        {"country": "IND", "reason": "Oil exports, large expat community"},
+        {"country": "GBR", "reason": "Historic ties, defense"}
+      ],
+      "tensions": [
+        {"country": "IRQ", "reason": "Residual from 1990 invasion, ongoing claims issues"}
+      ]
+    }
+  },
+  "OMN": {
+    "basic": {
+      "name": "Oman",
+      "capital": "Muscat",
+      "region": "West Asia",
+      "government": "Absolute monarchy (sultanate)",
+      "languages": ["Arabic"],
+      "currency": "Omani Rial (OMR)"
+    },
+    "snapshot": {
+      "population": "4.7 million",
+      "gdp": "$110 billion",
+      "gdp_per_capita": "$23,500",
+      "economy_type": "Oil and gas, diversifying"
+    },
+    "identity": "Gulf state with distinctive neutralist foreign policy. Ibadi Islam (neither Sunni nor Shia) enables mediator role between Iran and West. Strategic Strait of Hormuz location.",
+    "strengths": ["Strategic location at Strait of Hormuz", "Diplomatic neutrality as convener", "Political stability", "Tourism potential", "Good US and Iran relations"],
+    "weaknesses": ["Oil dependence", "Fiscal pressures", "Youth unemployment", "Smaller reserves than neighbors"],
+    "current_position": "Continuing mediator role (Iran-US backchannels); Vision 2040 diversification; cautious of regional conflict spillover; steady Sultan Haitham leadership since 2020.",
+    "history_brief": "Maritime empire from Zanzibar to Balochistan. Isolated under Sultan Said bin Taimur until son Qaboos overthrew him 1970. Qaboos modernized in 50-year rule until death 2020. Haitham bin Tariq now sultan, pursuing measured reforms.",
+    "relationships": {
+      "allies": [
+        {"country": "GBR", "reason": "Historic ties, defense cooperation"}
+      ],
+      "working": [
+        {"country": "USA", "reason": "Strategic partner, access agreements"},
+        {"country": "SAU", "reason": "Gulf partner despite past distance"},
+        {"country": "IRN", "reason": "Unique working relationship among Gulf states"},
+        {"country": "IND", "reason": "Trade, expat community, defense"},
+        {"country": "CHN", "reason": "Port investment (Duqm), oil customer"}
+      ],
+      "tensions": []
+    }
+  },
+  "BHR": {
+    "basic": {
+      "name": "Bahrain",
+      "capital": "Manama",
+      "region": "West Asia",
+      "government": "Constitutional monarchy (practically absolute)",
+      "languages": ["Arabic"],
+      "currency": "Bahraini Dinar (BHD)"
+    },
+    "snapshot": {
+      "population": "1.5 million",
+      "gdp": "$45 billion",
+      "gdp_per_capita": "$30,000",
+      "economy_type": "Financial services, declining oil"
+    },
+    "identity": "Small island kingdom with Sunni monarchy ruling Shia-majority population. US Fifth Fleet headquarters. Closely aligned with Saudi Arabia.",
+    "strengths": ["Financial services hub historically", "US Fifth Fleet base", "Saudi financial backing", "Early diversification"],
+    "weaknesses": ["Sectarian tensions (Sunni rule, Shia majority)", "Declining oil reserves", "Regional competition from Dubai", "Vulnerable to Iranian influence"],
+    "current_position": "Firmly in Saudi-UAE camp; maintained Abraham Accords with Israel despite Gaza; US base critical; periodic Shia unrest suppressed.",
+    "history_brief": "Al Khalifa family since 18th century. British protectorate until 1971 independence. Arab Spring protests 2011 (Shia-led) crushed with Saudi help. Abraham Accords with Israel 2020. Ongoing sectarian undertow.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Fifth Fleet HQ, major non-NATO ally"},
+        {"country": "SAU", "reason": "Protector and political backer"},
+        {"country": "ARE", "reason": "Close Gulf partner"},
+        {"country": "ISR", "reason": "Abraham Accords"}
+      ],
+      "working": [
+        {"country": "GBR", "reason": "Historic ties, naval base"},
+        {"country": "EGY", "reason": "Political alignment"}
+      ],
+      "tensions": [
+        {"country": "IRN", "reason": "Accusations of backing Shia opposition"}
+      ]
+    }
+  },
+  "YEM": {
+    "basic": {
+      "name": "Yemen",
+      "capital": "Sana'a (Houthi-controlled), Aden (government)",
+      "region": "West Asia",
+      "government": "Divided: internationally recognized government vs Houthi movement",
+      "languages": ["Arabic"],
+      "currency": "Yemeni Rial (YER)"
+    },
+    "snapshot": {
+      "population": "34 million",
+      "gdp": "$21 billion",
+      "gdp_per_capita": "$620",
+      "economy_type": "Collapsed, humanitarian emergency"
+    },
+    "identity": "Poorest Arab country, fractured by civil war since 2014. Houthi movement controls north including capital, disrupting Red Sea shipping. One of the world's worst humanitarian crises.",
+    "strengths": ["Strategic location at Bab el-Mandeb", "Young population", "Historical trading culture"],
+    "weaknesses": ["Civil war, divided state", "Humanitarian catastrophe", "Famine risk", "Collapsed institutions", "Houthi missile arsenal"],
+    "current_position": "Houthis disrupting Red Sea shipping with attacks on vessels in solidarity with Gaza; absorbing US-UK strikes; Saudi-Houthi peace process paused; humanitarian crisis severe.",
+    "history_brief": "North and South Yemen unified 1990. Ali Abdullah Saleh ruled until 2011 Arab Spring. Houthi takeover of Sana'a 2014. Saudi-led coalition intervened 2015. Saleh killed by Houthis 2017. Saudi-Iran deal 2023 created space for peace talks derailed by Gaza war.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "IRN", "reason": "Houthi patron (for Houthi side)"},
+        {"country": "SAU", "reason": "Backs government (complex position)"},
+        {"country": "ARE", "reason": "Backs southern forces"}
+      ],
+      "tensions": [
+        {"country": "USA", "reason": "Strikes against Houthis over shipping"},
+        {"country": "ISR", "reason": "Houthi missile attacks"}
+      ]
+    }
+  },
+  "JOR": {
+    "basic": {
+      "name": "Jordan",
+      "capital": "Amman",
+      "region": "West Asia",
+      "government": "Constitutional monarchy",
+      "languages": ["Arabic"],
+      "currency": "Jordanian Dinar (JOD)"
+    },
+    "snapshot": {
+      "population": "11.4 million",
+      "gdp": "$51 billion",
+      "gdp_per_capita": "$4,500",
+      "economy_type": "Services and aid-dependent"
+    },
+    "identity": "Stable Hashemite monarchy in a dangerous neighborhood. Hosts millions of refugees. Peace treaty with Israel since 1994 strained by Gaza war but holding.",
+    "strengths": ["Political stability", "Well-trained military", "Western support", "Educated workforce", "Custodian of Jerusalem's Muslim holy sites"],
+    "weaknesses": ["Refugee burden (Palestinian, Iraqi, Syrian)", "Water scarcity extreme", "High unemployment", "Aid dependence", "Regional exposure"],
+    "current_position": "Vocally critical of Israel over Gaza while maintaining treaty; hosting US troops; managing Iranian-backed threats from Iraq and Syria; economic strain from regional disruption.",
+    "history_brief": "Created by British post-Ottoman. Hashemite dynasty installed 1921. Independence 1946. Lost West Bank in 1967 war. Peace with Israel 1994 under King Hussein. King Abdullah II on throne since 1999.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Major non-NATO ally, military aid"},
+        {"country": "SAU", "reason": "Financial support, political alignment"},
+        {"country": "GBR", "reason": "Historic ties, defense"}
+      ],
+      "working": [
+        {"country": "ISR", "reason": "Peace treaty, water/security despite Gaza strain"},
+        {"country": "EGY", "reason": "Strategic alignment"},
+        {"country": "ARE", "reason": "Investment and aid"},
+        {"country": "TUR", "reason": "Trade and political ties"}
+      ],
+      "tensions": [
+        {"country": "IRN", "reason": "Militia threats via Iraq and Syria"}
+      ]
+    }
+  },
+  "LBN": {
+    "basic": {
+      "name": "Lebanon",
+      "capital": "Beirut",
+      "region": "West Asia",
+      "government": "Parliamentary republic (confessional system)",
+      "languages": ["Arabic", "French"],
+      "currency": "Lebanese Pound (LBP)"
+    },
+    "snapshot": {
+      "population": "5.4 million",
+      "gdp": "$22 billion",
+      "gdp_per_capita": "$4,100",
+      "economy_type": "Collapsed, services-based"
+    },
+    "identity": "Religiously divided (18 official sects) Mediterranean state with a collapsed economy and weakened Hezbollah. Living with the consequences of 2019 financial collapse and 2024 Israel-Hezbollah war.",
+    "strengths": ["Highly educated diaspora", "Historical regional hub", "Cultural production", "Strategic location"],
+    "weaknesses": ["Economic collapse since 2019", "Sectarian political paralysis", "Hezbollah state-within-state (weakened)", "Infrastructure decay", "Massive emigration"],
+    "current_position": "Post-2024 war, Hezbollah significantly degraded after Israeli campaign eliminating senior leadership; new presidency and government formed 2025 after long vacancy; hope for reconstruction funding.",
+    "history_brief": "French mandate, independent 1943 with sectarian power-sharing. Civil war 1975–90. Syrian occupation until 2005. 2006 Israel-Hezbollah war. 2019 economic collapse, Beirut port explosion 2020. Hezbollah joined Gaza war 2023, severe Israeli retaliation 2024.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "FRA", "reason": "Historic ties, mediator role"},
+        {"country": "SAU", "reason": "Post-Hezbollah-weakening re-engagement"},
+        {"country": "USA", "reason": "Political support for new government"},
+        {"country": "EGY", "reason": "Arab League role"}
+      ],
+      "tensions": [
+        {"country": "ISR", "reason": "Border conflict, 2024 war aftermath"},
+        {"country": "SYR", "reason": "Legacy tensions, border issues"}
+      ]
+    }
+  },
+  "SYR": {
+    "basic": {
+      "name": "Syria",
+      "capital": "Damascus",
+      "region": "West Asia",
+      "government": "Transitional government (post-Assad)",
+      "languages": ["Arabic"],
+      "currency": "Syrian Pound (SYP)"
+    },
+    "snapshot": {
+      "population": "23 million",
+      "gdp": "$23 billion (collapsed)",
+      "gdp_per_capita": "$1,000",
+      "economy_type": "War-shattered, transitioning"
+    },
+    "identity": "Transformed by December 2024 fall of Assad regime after 53 years of Ba'ath rule. Now under transitional government led by HTS-origin leadership navigating reconstruction and international legitimacy.",
+    "strengths": ["Educated diaspora potentially returning", "Strategic location", "Reconstruction opportunity", "End of Assad rule removes key barrier"],
+    "weaknesses": ["Devastated infrastructure", "Sectarian and ethnic fragmentation", "Kurdish/SDF northeast autonomy issues", "Unresolved minority rights", "Sanctions still in place", "HTS origin of new leadership"],
+    "current_position": "Transitional authority under Ahmad al-Sharaa building institutions; managing minority concerns (Alawites, Christians, Druze, Kurds); seeking sanctions relief and Gulf reconstruction money; Turkey and Gulf states key backers; Russia and Iran out.",
+    "history_brief": "French mandate, independent 1946. Ba'ath Party coup 1963. Hafez al-Assad 1970–2000. Bashar succeeded. Arab Spring protest 2011 became civil war. Russian and Iranian intervention kept Assad in power. HTS-led offensive December 2024 toppled Assad in days. Transitional period since.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "TUR", "reason": "Key external backer, border influence"},
+        {"country": "SAU", "reason": "Reconstruction funding, normalization"},
+        {"country": "QAT", "reason": "Supporter of transition"},
+        {"country": "ARE", "reason": "Engagement for regional stability"}
+      ],
+      "tensions": [
+        {"country": "ISR", "reason": "Post-Assad strikes, Golan and buffer zone"},
+        {"country": "IRN", "reason": "Lost ally, cut from regional network"},
+        {"country": "RUS", "reason": "Lost patronage, bases uncertain"}
+      ]
+    }
+  },
+  "ISR": {
+    "basic": {
+      "name": "Israel",
+      "capital": "Jerusalem (claimed)",
+      "region": "West Asia",
+      "government": "Parliamentary democracy",
+      "languages": ["Hebrew", "Arabic"],
+      "currency": "Israeli Shekel (ILS)"
+    },
+    "snapshot": {
+      "population": "9.9 million",
+      "gdp": "$525 billion",
+      "gdp_per_capita": "$53,000",
+      "economy_type": "Developed, high-tech dominant"
+    },
+    "identity": "Advanced high-tech democracy and regional military superpower. Transformed regional security in 2023–25 through Gaza war and degrading Iran's proxy network. Deep internal political divisions over judicial reform and post-war future.",
+    "strengths": ["Most advanced military in region (with nuclear)", "Unicorn-factory tech sector", "Intelligence services", "US strategic partnership", "Demonstrated ability to strike Iran directly"],
+    "weaknesses": ["Gaza humanitarian crisis reputational cost", "Deep political polarization", "Diplomatic isolation in Global South", "Hostage crisis and trauma", "Security-economy trade-off"],
+    "current_position": "Consolidating gains from degrading Hamas, Hezbollah, and Iran; West Bank tensions; Saudi normalization on hold; managing war's international fallout; Netanyahu government under political and legal pressure.",
+    "history_brief": "Founded 1948 after UN partition, Arab-Israeli war. Territorial expansion 1967 Six-Day War. Peace with Egypt 1979, Jordan 1994. Oslo process 1990s. Second Intifada. Gaza withdrawal 2005. Abraham Accords 2020. October 7 2023 Hamas attack triggered multi-front war reshaping region.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Unconditional military and diplomatic partnership"},
+        {"country": "ARE", "reason": "Abraham Accords, tech and defense"},
+        {"country": "BHR", "reason": "Abraham Accords"},
+        {"country": "IND", "reason": "Defense tech partnership"}
+      ],
+      "working": [
+        {"country": "JOR", "reason": "Peace treaty holds despite strain"},
+        {"country": "EGY", "reason": "Peace treaty, Gaza coordination"},
+        {"country": "DEU", "reason": "Historic obligation, strong support"},
+        {"country": "GBR", "reason": "Strong security cooperation"},
+        {"country": "AZE", "reason": "Quiet strategic partner near Iran"}
+      ],
+      "tensions": [
+        {"country": "IRN", "reason": "Direct military confrontation, existential enmity"},
+        {"country": "LBN", "reason": "Hezbollah aftermath, border"},
+        {"country": "SYR", "reason": "Strikes on post-Assad Syria, buffer zone"},
+        {"country": "YEM", "reason": "Houthi missile attacks"},
+        {"country": "TUR", "reason": "Erdogan's harsh Gaza rhetoric"}
+      ]
+    }
+  },
+  "TUR": {
+    "basic": {
+      "name": "Turkey",
+      "capital": "Ankara",
+      "region": "West Asia / Europe",
+      "government": "Presidential republic",
+      "languages": ["Turkish"],
+      "currency": "Turkish Lira (TRY)"
+    },
+    "snapshot": {
+      "population": "85.8 million",
+      "gdp": "$1.1 trillion",
+      "gdp_per_capita": "$12,800",
+      "economy_type": "Emerging, manufacturing and services"
+    },
+    "identity": "Transcontinental NATO member pursuing increasingly independent, assertive foreign policy under Erdogan. Regional power broker active from the Caucasus to Libya to Syria.",
+    "strengths": ["Large, capable military (2nd in NATO by personnel)", "Defense industry (Bayraktar drones)", "Strategic geography (straits)", "Manufacturing base", "Regional diplomatic reach"],
+    "weaknesses": ["Chronic lira depreciation and inflation", "Authoritarian drift under Erdogan", "Frosty EU accession", "Kurdish question", "Earthquake recovery burden"],
+    "current_position": "Kingmaker in post-Assad Syria; mediating Russia-Ukraine; holding up NATO expansion at times; economic orthodoxy returned under new finance team; Erdogan constitutional succession question looming.",
+    "history_brief": "Ottoman Empire collapse 1918. Republic 1923 under Ataturk. NATO member 1952. Coups in 1960, 1971, 1980. Erdogan's AKP from 2002. 2016 failed coup attempt. Shift toward presidential system 2017. Major regional interventions from 2016 (Syria, Libya, Karabakh).",
+    "relationships": {
+      "allies": [
+        {"country": "AZE", "reason": "One nation, two states — deep alliance"},
+        {"country": "QAT", "reason": "Strategic partnership, Turkish base"},
+        {"country": "PAK", "reason": "Defense and diplomatic alignment"}
+      ],
+      "working": [
+        {"country": "USA", "reason": "NATO ally despite frictions"},
+        {"country": "RUS", "reason": "Transactional — S-400, grain deals, Syria"},
+        {"country": "DEU", "reason": "Trade, large Turkish diaspora"},
+        {"country": "UKR", "reason": "Drones, mediator, Black Sea"},
+        {"country": "SAU", "reason": "Post-Khashoggi rapprochement"},
+        {"country": "SYR", "reason": "Key external backer of new government"}
+      ],
+      "tensions": [
+        {"country": "GRC", "reason": "Aegean disputes, Cyprus"},
+        {"country": "ARM", "reason": "Historical genocide denial, closed border"},
+        {"country": "ISR", "reason": "Gaza war rhetoric, political break"}
+      ]
+    }
+  },
+  "KAZ": {
+    "basic": {
+      "name": "Kazakhstan",
+      "capital": "Astana",
+      "region": "Central Asia",
+      "government": "Presidential republic (authoritarian)",
+      "languages": ["Kazakh", "Russian"],
+      "currency": "Kazakhstani Tenge (KZT)"
+    },
+    "snapshot": {
+      "population": "20.3 million",
+      "gdp": "$265 billion",
+      "gdp_per_capita": "$13,000",
+      "economy_type": "Oil, gas, and minerals"
+    },
+    "identity": "Largest Central Asian state and resource giant. Pursues multi-vector foreign policy balancing Russia, China, and the West. Post-2022 quiet distancing from Moscow.",
+    "strengths": ["Huge oil, gas, and uranium reserves", "Strategic Belt and Road location", "Largest economy in Central Asia", "Multi-vector diplomacy success"],
+    "weaknesses": ["Russian economic and pipeline dependence", "Income inequality", "Authoritarian governance limits reform", "Exposure to Chinese influence", "2022 unrest revealed instability"],
+    "current_position": "Carefully distancing from Russia without breaking ties; attracting Western investment fleeing Russia; hosting diplomatic initiatives; Tokayev consolidating power post-Nazarbayev era.",
+    "history_brief": "Soviet republic. Independence 1991 under Nazarbayev who ruled until 2019. Capital moved to Astana 1997. Oil wealth drove growth. Bloody January 2022 unrest gave Tokayev opportunity to sideline Nazarbayev family. Ukraine war accelerated pivot.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "RUS", "reason": "Deep historic and energy ties, transit routes"},
+        {"country": "CHN", "reason": "Major investor, Belt and Road hub"},
+        {"country": "USA", "reason": "Growing partner, critical minerals"},
+        {"country": "TUR", "reason": "Turkic cultural bloc, growing ties"},
+        {"country": "DEU", "reason": "Major EU trade partner"},
+        {"country": "UZB", "reason": "Central Asian regional cooperation"}
+      ],
+      "tensions": []
+    }
+  },
+  "UZB": {
+    "basic": {
+      "name": "Uzbekistan",
+      "capital": "Tashkent",
+      "region": "Central Asia",
+      "government": "Presidential republic (reforming)",
+      "languages": ["Uzbek"],
+      "currency": "Uzbekistani Som (UZS)"
+    },
+    "snapshot": {
+      "population": "36.8 million",
+      "gdp": "$103 billion",
+      "gdp_per_capita": "$2,800",
+      "economy_type": "Emerging, agriculture and industry"
+    },
+    "identity": "Most populous Central Asian state. Emerging from decades of Karimov isolation under reformist Mirziyoyev. Opening economy and seeking regional integration.",
+    "strengths": ["Largest Central Asian population and market", "Gold and cotton production", "Strategic central location", "Reform momentum, tourism opening", "Samarkand/Bukhara heritage"],
+    "weaknesses": ["Doubly landlocked", "Legacy of forced cotton labor", "Authoritarian governance limits", "Water scarcity (Aral Sea legacy)", "Youth unemployment"],
+    "current_position": "Deepening regional integration (Samarkand SCO summit); attracting Western investment as alternative to Russia; balancing all major powers; managing cotton reform and Karakalpak autonomy questions.",
+    "history_brief": "Timurid empire heritage. Soviet republic. Independence 1991 under Karimov who ruled until death 2016. Mirziyoyev succeeded and pursued reforms: currency liberalization, political opening, foreign policy normalization. Karakalpakstan protests 2022. 2023 constitutional reform extended presidential term.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "RUS", "reason": "Historical ties, labor migration"},
+        {"country": "CHN", "reason": "Major investor, BRI"},
+        {"country": "KAZ", "reason": "Regional cooperation, trade"},
+        {"country": "TUR", "reason": "Turkic bloc, growing economic ties"},
+        {"country": "KOR", "reason": "Investment and labor migration destination"},
+        {"country": "USA", "reason": "C5+1 framework, reforms support"}
+      ],
+      "tensions": []
+    }
+  },
+  "TKM": {
+    "basic": {
+      "name": "Turkmenistan",
+      "capital": "Ashgabat",
+      "region": "Central Asia",
+      "government": "Presidential republic (highly authoritarian)",
+      "languages": ["Turkmen"],
+      "currency": "Turkmenistani Manat (TMT)"
+    },
+    "snapshot": {
+      "population": "7.1 million",
+      "gdp": "$76 billion",
+      "gdp_per_capita": "$10,700",
+      "economy_type": "Gas-dominant, closed"
+    },
+    "identity": "Most closed Central Asian state with immense gas reserves. Officially 'permanently neutral.' Recently transitioned father-to-son presidency in dynastic pattern.",
+    "strengths": ["World's fourth-largest natural gas reserves", "Strategic location for pipelines", "Political stability (through repression)"],
+    "weaknesses": ["Extreme isolation", "Opaque economy", "Personality cult governance", "Infrastructure bottlenecks", "Heavy China gas dependence (single buyer)"],
+    "current_position": "Serdar Berdimuhamedov continuing father's authoritarian model; gas exports almost entirely to China; tentative engagement with Afghanistan via TAPI pipeline discussions; minimal international footprint.",
+    "history_brief": "Soviet republic. Independence 1991 under Niyazov (Turkmenbashi), cult of personality. Died 2006. Gurbanguly Berdimuhamedov ruled 2007-2022. Son Serdar became president 2022 while father kept other powers. One of the world's most closed societies.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Dominant gas customer, essentially monopoly"},
+        {"country": "RUS", "reason": "Historical ties, limited gas trade"},
+        {"country": "TUR", "reason": "Turkic cultural connection"},
+        {"country": "UZB", "reason": "Regional cooperation, energy"},
+        {"country": "AFG", "reason": "TAPI pipeline interest"}
+      ],
+      "tensions": []
+    }
+  },
+  "KGZ": {
+    "basic": {
+      "name": "Kyrgyzstan",
+      "capital": "Bishkek",
+      "region": "Central Asia",
+      "government": "Presidential republic",
+      "languages": ["Kyrgyz", "Russian"],
+      "currency": "Kyrgyzstani Som (KGS)"
+    },
+    "snapshot": {
+      "population": "7 million",
+      "gdp": "$14 billion",
+      "gdp_per_capita": "$2,000",
+      "economy_type": "Small, remittance and mining"
+    },
+    "identity": "Mountainous Central Asian state with most open political culture in the region (though regressing). Economically dependent on Russia for remittances and on China for trade.",
+    "strengths": ["Most pluralist Central Asian political tradition", "Kumtor gold mine", "Tourism potential", "Strategic location"],
+    "weaknesses": ["Chronic political instability (multiple revolutions)", "Heavy remittance dependence on Russia", "Ethnic tensions with Uzbek minority", "Recent authoritarian slide", "Mining governance issues"],
+    "current_position": "Japarov consolidating power; managing Russian remittance-driven economy while absorbing sanctions-evasion trade; tensions with Tajikistan over border; tightening media and civil society restrictions.",
+    "history_brief": "Soviet republic. Independence 1991. Revolutions 2005 (Akayev out), 2010 (Bakiyev out), 2020 (Japarov rose). Most freewheeling Central Asian politics historically. Border clashes with Tajikistan 2022. Slide toward authoritarianism under Japarov.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "RUS", "reason": "CSTO, remittance source, deep influence"},
+        {"country": "CHN", "reason": "Major trade partner, transit"},
+        {"country": "KAZ", "reason": "Regional partner"},
+        {"country": "UZB", "reason": "Improving ties, border settled"},
+        {"country": "TUR", "reason": "Turkic bloc"}
+      ],
+      "tensions": [
+        {"country": "TJK", "reason": "Border disputes, recent armed clashes"}
+      ]
+    }
+  },
+  "TJK": {
+    "basic": {
+      "name": "Tajikistan",
+      "capital": "Dushanbe",
+      "region": "Central Asia",
+      "government": "Presidential republic (authoritarian)",
+      "languages": ["Tajik"],
+      "currency": "Tajikistani Somoni (TJS)"
+    },
+    "snapshot": {
+      "population": "10.2 million",
+      "gdp": "$13 billion",
+      "gdp_per_capita": "$1,280",
+      "economy_type": "Poorest Central Asia, remittances"
+    },
+    "identity": "Persian-speaking Central Asian state, poorest in the region. Under Rahmon's 30-year rule. Border with Afghanistan gives heightened security dimension.",
+    "strengths": ["Hydropower potential (Rogun Dam)", "Aluminum exports", "Strategic Afghan border position", "Russian security partnership"],
+    "weaknesses": ["Poorest Central Asian state", "Heavy remittance dependence", "Long Afghan border security", "Suppressed political opposition", "Clan politics"],
+    "current_position": "Rahmon continuing long authoritarian rule with son being positioned as successor; security-focused given Afghan border; CSTO anchor for Russia; receiving Chinese investment.",
+    "history_brief": "Soviet republic. Independence 1991. Brutal civil war 1992–97 (tens of thousands killed). Rahmon ruled since. Islamist opposition banned 2015. Border clashes with Kyrgyzstan 2022. Deepening China ties.",
+    "relationships": {
+      "allies": [
+        {"country": "RUS", "reason": "CSTO, Russian military base, security backer"}
+      ],
+      "working": [
+        {"country": "CHN", "reason": "Investment, security cooperation, debt"},
+        {"country": "IRN", "reason": "Persian cultural connection"},
+        {"country": "UZB", "reason": "Improved regional ties"},
+        {"country": "KAZ", "reason": "Regional cooperation"}
+      ],
+      "tensions": [
+        {"country": "KGZ", "reason": "Border disputes, armed clashes"},
+        {"country": "AFG", "reason": "Anti-Taliban stance, border security"}
+      ]
+    }
+  },
+  "IDN": {
+    "basic": {
+      "name": "Indonesia",
+      "capital": "Jakarta (Nusantara under transition)",
+      "region": "Southeast Asia",
+      "government": "Presidential republic",
+      "languages": ["Indonesian (Bahasa Indonesia)"],
+      "currency": "Indonesian Rupiah (IDR)"
+    },
+    "snapshot": {
+      "population": "278 million",
+      "gdp": "$1.4 trillion (16th largest)",
+      "gdp_per_capita": "$5,000",
+      "economy_type": "Emerging, resources and manufacturing"
+    },
+    "identity": "World's fourth most populous nation, largest Muslim-majority democracy, and the giant of Southeast Asia. Non-aligned foreign policy tradition. Rising middle power.",
+    "strengths": ["Huge domestic market", "Resource wealth (nickel, coal, palm oil)", "Demographic dividend", "G20 middle-power diplomacy", "Democratic consolidation"],
+    "weaknesses": ["Infrastructure gaps despite improvement", "Corruption", "Regional inequality", "Capital relocation execution risks", "Middle-income trap concerns"],
+    "current_position": "Under Prabowo Subianto (inaugurated Oct 2024), pursuing resource-based industrialization; balancing US and China with growing defense ties to both; new capital Nusantara project in question; expanding BRICS and Global South diplomacy.",
+    "history_brief": "Dutch colony 300+ years. Independence declared 1945, recognized 1949. Sukarno's Guided Democracy. Suharto's New Order 1967-98. Democratic transition 1998. SBY and Jokowi periods stabilized democracy. Prabowo (Suharto-era general) won 2024 election.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "USA", "reason": "Strategic partnership, defense cooperation"},
+        {"country": "CHN", "reason": "Largest trade partner, nickel investment, BRI"},
+        {"country": "JPN", "reason": "Major investor, infrastructure"},
+        {"country": "AUS", "reason": "Defense and economic partner"},
+        {"country": "KOR", "reason": "Major investor, defense (KF-21 program)"},
+        {"country": "RUS", "reason": "Defense equipment, energy"},
+        {"country": "IND", "reason": "Growing partnership, Indo-Pacific"}
+      ],
+      "tensions": [
+        {"country": "CHN", "reason": "Natuna Islands EEZ disputes (maintained alongside cooperation)"}
+      ]
+    }
+  },
+  "THA": {
+    "basic": {
+      "name": "Thailand",
+      "capital": "Bangkok",
+      "region": "Southeast Asia",
+      "government": "Constitutional monarchy with parliamentary system",
+      "languages": ["Thai"],
+      "currency": "Thai Baht (THB)"
+    },
+    "snapshot": {
+      "population": "71.8 million",
+      "gdp": "$550 billion",
+      "gdp_per_capita": "$7,700",
+      "economy_type": "Upper-middle income, manufacturing and tourism"
+    },
+    "identity": "Southeast Asia's second-largest economy, never formally colonized. Tourist and manufacturing hub. Chronic political tension between military-royalist establishment and populist/reformist movements.",
+    "strengths": ["Tourism industry (pre-COVID world-leading)", "Automotive manufacturing hub", "Agricultural exports", "Geographic centrality in ASEAN", "Hospital and medical tourism"],
+    "weaknesses": ["Demographic decline", "Political instability (coups, constitutional crises)", "Middle-income trap", "Lèse-majesté restrictions", "Southern insurgency"],
+    "current_position": "Paetongtarn Shinawatra government continuing family's political dynasty under military-royalist constraints; economic stimulus and digital wallet scheme; balancing US alliance with deep China trade; cautious Myanmar engagement.",
+    "history_brief": "Siam modernized under Chulalongkorn avoiding colonization. Constitutional monarchy 1932. Chronic military interventions (20+ coups). King Bhumibol's 70-year reign until 2016. Thaksin Shinawatra era political divide from 2001. Multiple coups. Move Forward Party dissolved 2024. Shinawatra family back in power.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Major non-NATO ally, treaty partner"}
+      ],
+      "working": [
+        {"country": "CHN", "reason": "Largest trade partner, defense equipment"},
+        {"country": "JPN", "reason": "Major investor, automotive"},
+        {"country": "KOR", "reason": "Investment, defense cooperation"},
+        {"country": "IND", "reason": "Act East partner"},
+        {"country": "ARE", "reason": "Tourism and trade"}
+      ],
+      "tensions": [
+        {"country": "MMR", "reason": "Complex: border, refugees, scam compounds"},
+        {"country": "KHM", "reason": "Occasional border and heritage disputes"}
+      ]
+    }
+  },
+  "VNM": {
+    "basic": {
+      "name": "Vietnam",
+      "capital": "Hanoi",
+      "region": "Southeast Asia",
+      "government": "One-party socialist republic (Communist Party)",
+      "languages": ["Vietnamese"],
+      "currency": "Vietnamese Dong (VND)"
+    },
+    "snapshot": {
+      "population": "100 million",
+      "gdp": "$470 billion",
+      "gdp_per_capita": "$4,700",
+      "economy_type": "Manufacturing-driven, rapidly growing"
+    },
+    "identity": "Communist-led but aggressively capitalist economy. Biggest beneficiary of China+1 supply chain shift. Deft bamboo diplomacy balancing US, China, and Russia.",
+    "strengths": ["Manufacturing attractiveness for FDI", "Young, educated workforce", "Diplomatic agility", "Export discipline", "Political stability"],
+    "weaknesses": ["One-party political ceiling", "Anti-corruption 'blazing furnace' campaign disrupts business", "Infrastructure gaps", "Aging ahead of getting rich", "Climate vulnerability"],
+    "current_position": "To Lam consolidating power after anti-corruption campaign toppled rivals; hosting upgraded Comprehensive Strategic Partnerships with US, Russia, Japan, and others; major FDI beneficiary; South China Sea tensions with China managed carefully.",
+    "history_brief": "French colony, Ho Chi Minh's independence struggle. Partitioned 1954. Vietnam War 1955–75, communist victory. Doi Moi economic reforms 1986. WTO 2007. Manufacturing boom accelerated by US-China trade war. Major leadership changes 2023–24 elevated To Lam.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "USA", "reason": "Comprehensive Strategic Partnership 2023, major trade"},
+        {"country": "CHN", "reason": "Largest trade partner, ideological ally, disputes managed"},
+        {"country": "RUS", "reason": "Historic defense supplier, recent CSP upgrade"},
+        {"country": "KOR", "reason": "Largest FDI source, Samsung massive presence"},
+        {"country": "JPN", "reason": "Major investor, infrastructure"},
+        {"country": "IND", "reason": "Strategic partner, defense cooperation"},
+        {"country": "AUS", "reason": "Comprehensive Strategic Partnership"}
+      ],
+      "tensions": [
+        {"country": "CHN", "reason": "South China Sea territorial disputes (despite cooperation)"}
+      ]
+    }
+  },
+  "PHL": {
+    "basic": {
+      "name": "Philippines",
+      "capital": "Manila",
+      "region": "Southeast Asia",
+      "government": "Presidential republic",
+      "languages": ["Filipino", "English"],
+      "currency": "Philippine Peso (PHP)"
+    },
+    "snapshot": {
+      "population": "117 million",
+      "gdp": "$475 billion",
+      "gdp_per_capita": "$4,060",
+      "economy_type": "Services and remittances"
+    },
+    "identity": "Southeast Asian archipelago closest to US historically. Under Marcos Jr. decisively back in US orbit after Duterte's China pivot. Front-line state in South China Sea pushback.",
+    "strengths": ["English-speaking workforce", "BPO industry global leader", "OFW remittances", "Young population", "US alliance and defense access (EDCA)"],
+    "weaknesses": ["Poverty and inequality", "Natural disaster exposure (typhoons)", "Corruption", "Infrastructure gaps", "Political polarization (Marcos-Duterte rift)"],
+    "current_position": "Marcos Jr. accelerating US military access (new EDCA sites) and Japan/Australia trilaterals; publicly confronting Chinese coercion in South China Sea; Duterte-Marcos alliance collapse reshaping domestic politics; ICC Duterte case proceedings.",
+    "history_brief": "Spanish colony 300+ years. US colony 1898. Independence 1946. Marcos Sr. dictatorship 1965–86. People Power revolution. Corazon Aquino democratic restoration. Duterte's war on drugs 2016–22. Marcos Jr (son) won 2022 in alliance with Duterte's daughter, which has since fractured.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Mutual Defense Treaty, EDCA expansion"},
+        {"country": "JPN", "reason": "RAA signed, major investor"},
+        {"country": "AUS", "reason": "Strategic partnership, defense"}
+      ],
+      "working": [
+        {"country": "KOR", "reason": "Strategic partner, FA-50 jets"},
+        {"country": "IND", "reason": "BrahMos missile deal, growing defense"},
+        {"country": "VNM", "reason": "Shared China concerns, cooperation"}
+      ],
+      "tensions": [
+        {"country": "CHN", "reason": "South China Sea confrontations at shoals, water cannon incidents"}
+      ]
+    }
+  },
+  "MYS": {
+    "basic": {
+      "name": "Malaysia",
+      "capital": "Kuala Lumpur (Putrajaya administrative)",
+      "region": "Southeast Asia",
+      "government": "Federal parliamentary constitutional monarchy",
+      "languages": ["Malay", "English"],
+      "currency": "Malaysian Ringgit (MYR)"
+    },
+    "snapshot": {
+      "population": "34 million",
+      "gdp": "$440 billion",
+      "gdp_per_capita": "$13,000",
+      "economy_type": "Upper-middle income, diversified"
+    },
+    "identity": "Multicultural (Malay, Chinese, Indian) Southeast Asian state balancing Islamic identity with economic openness. Major semiconductor assembly hub benefiting from China+1.",
+    "strengths": ["Semiconductor back-end dominance", "Palm oil and rubber exports", "Tourism", "Strategic Malacca Strait position", "Stable infrastructure"],
+    "weaknesses": ["Ethnic/religious balance pressures", "Brain drain to Singapore", "1MDB legacy trust issues", "Middle-income trap risks"],
+    "current_position": "Under Anwar Ibrahim's unity government, balancing US and China with lean toward China economically; Johor-Singapore Special Economic Zone push; strong pro-Palestinian stance straining some Western ties; semiconductor investment surge.",
+    "history_brief": "British Malaya. Independence 1957. Malaysia formed 1963 (Singapore left 1965). Mahathir's long rule 1981–2003 and again 2018–20. 1MDB scandal toppled Najib Razak. Anwar Ibrahim finally became PM November 2022 after 25-year journey.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Largest trade partner, major investor"},
+        {"country": "USA", "reason": "Comprehensive partnership, semiconductor investment"},
+        {"country": "JPN", "reason": "Major investor, Look East legacy"},
+        {"country": "SGP", "reason": "Causeway neighbor, JS-SEZ cooperation"},
+        {"country": "IDN", "reason": "Regional partner in ASEAN"},
+        {"country": "SAU", "reason": "Religious and economic ties"}
+      ],
+      "tensions": [
+        {"country": "ISR", "reason": "No relations, vocal pro-Palestinian stance"}
+      ]
+    }
+  },
+  "SGP": {
+    "basic": {
+      "name": "Singapore",
+      "capital": "Singapore",
+      "region": "Southeast Asia",
+      "government": "Parliamentary republic (dominant-party)",
+      "languages": ["English", "Mandarin", "Malay", "Tamil"],
+      "currency": "Singapore Dollar (SGD)"
+    },
+    "snapshot": {
+      "population": "6 million",
+      "gdp": "$525 billion",
+      "gdp_per_capita": "$87,800",
+      "economy_type": "Advanced, financial/logistics hub"
+    },
+    "identity": "City-state and global hub for finance, logistics, and increasingly tech. Technocratic governance and strategic neutrality make it indispensable to everyone. Recent prime ministerial transition from Lee family.",
+    "strengths": ["World-class port and logistics", "Financial hub in Asia", "Political stability and rule of law", "Skilled workforce", "Strategic neutrality position", "Highest PISA scores"],
+    "weaknesses": ["Ultra-high cost of living", "Dependence on imports (food, water)", "Fertility collapse", "One-party dominance limits scrutiny", "Caught in US-China tensions"],
+    "current_position": "Lawrence Wong took over as PM May 2024 (4G succession from Lee Hsien Loong); continuing balancing act between US (security) and China (trade); AI and sustainability push; managing regional instability (Myanmar, South China Sea).",
+    "history_brief": "British colony, briefly in Malaysia 1963-65. Expelled 1965, Lee Kuan Yew drove state-led development. Transformed from third-world port to first-world hub in one generation. Goh Chok Tong (1990-2004), Lee Hsien Loong (2004-2024), Lawrence Wong now.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "USA", "reason": "Strategic partner, host to Navy logistics"},
+        {"country": "CHN", "reason": "Largest trade partner, deep economic ties"},
+        {"country": "MYS", "reason": "Neighbor, JS-SEZ, water agreement"},
+        {"country": "IDN", "reason": "Largest FDI source for Indonesia, regional partner"},
+        {"country": "IND", "reason": "CECA partner, major diaspora connections"},
+        {"country": "AUS", "reason": "CSP, FTA, defense cooperation"},
+        {"country": "JPN", "reason": "Close economic and investment partner"}
+      ],
+      "tensions": []
+    }
+  },
+  "MMR": {
+    "basic": {
+      "name": "Myanmar",
+      "capital": "Naypyidaw",
+      "region": "Southeast Asia",
+      "government": "Military junta (State Administration Council)",
+      "languages": ["Burmese"],
+      "currency": "Myanmar Kyat (MMK)"
+    },
+    "snapshot": {
+      "population": "54 million",
+      "gdp": "$65 billion (collapsed)",
+      "gdp_per_capita": "$1,200",
+      "economy_type": "Collapsed, resource extraction, illicit"
+    },
+    "identity": "Southeast Asian country in civil war since 2021 military coup. Junta losing territory to ethnic armed organizations and pro-democracy forces. Major hub of cyber-scam compounds.",
+    "strengths": ["Natural resources (jade, rare earths, timber, gas)", "Strategic position between India and China", "Young population"],
+    "weaknesses": ["Ongoing civil war", "Economic collapse", "Humanitarian catastrophe", "Cyber-scam compound notoriety", "Rohingya crisis unresolved", "International isolation"],
+    "current_position": "Junta losing ground since Operation 1027 offensive by ethnic alliance; National Unity Government (opposition) gaining recognition; China pressuring all sides for stability; Thailand and India hedging; ASEAN paralyzed.",
+    "history_brief": "British Burma. Independence 1948. Military rule from 1962. Aung San Suu Kyi's struggle 1988 onward. Partial democratic opening 2011-21. NLD election wins. February 2021 coup by Min Aung Hlaing triggered civil war that has since escalated dramatically.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Major backer of junta, pipelines, investment, but managing instability"},
+        {"country": "RUS", "reason": "Military supplier to junta"},
+        {"country": "IND", "reason": "Hedging engagement with junta, border security"},
+        {"country": "THA", "reason": "Border trade, refugees, scam compound cross-border issues"}
+      ],
+      "tensions": [
+        {"country": "USA", "reason": "Sanctions on junta"},
+        {"country": "BGD", "reason": "Rohingya refugee crisis, border instability"}
+      ]
+    }
+  },
+  "KHM": {
+    "basic": {
+      "name": "Cambodia",
+      "capital": "Phnom Penh",
+      "region": "Southeast Asia",
+      "government": "Constitutional monarchy, one-party dominant",
+      "languages": ["Khmer"],
+      "currency": "Cambodian Riel (KHR)"
+    },
+    "snapshot": {
+      "population": "17 million",
+      "gdp": "$47 billion",
+      "gdp_per_capita": "$2,800",
+      "economy_type": "Garments, tourism, construction"
+    },
+    "identity": "Post-Khmer Rouge state under Hun family dynastic rule. Effectively a Chinese client state. Economy driven by garment exports and tourism to Angkor.",
+    "strengths": ["Garment industry", "Angkor tourism", "Chinese investment inflow", "Young population"],
+    "weaknesses": ["Deep authoritarian governance", "Corruption", "Scam compound industry", "Dependence on China", "Weak institutions"],
+    "current_position": "Hun Manet succeeded father Hun Sen as PM 2023 (father remains senator president); deepening Chinese ties (Ream naval base controversy); cyber-scam industry huge issue; Funan Techo Canal project with China.",
+    "history_brief": "French colony. Independence 1953. Khmer Rouge genocide 1975-79 (1.5-2M killed). Vietnamese intervention ended it. UN transition 1991-93. Hun Sen ruled since 1985 in various capacities. Son Hun Manet elevated 2023.",
+    "relationships": {
+      "allies": [
+        {"country": "CHN", "reason": "De facto patron, huge investment, military access"}
+      ],
+      "working": [
+        {"country": "VNM", "reason": "Historical intervener, regional partner"},
+        {"country": "JPN", "reason": "Aid and investment"},
+        {"country": "KOR", "reason": "Investment"},
+        {"country": "THA", "reason": "Neighbor, trade, occasional friction"}
+      ],
+      "tensions": [
+        {"country": "USA", "reason": "Sanctions over Ream base, democratic backsliding"}
+      ]
+    }
+  },
+  "LAO": {
+    "basic": {
+      "name": "Laos",
+      "capital": "Vientiane",
+      "region": "Southeast Asia",
+      "government": "One-party socialist republic",
+      "languages": ["Lao"],
+      "currency": "Lao Kip (LAK)"
+    },
+    "snapshot": {
+      "population": "7.7 million",
+      "gdp": "$15 billion",
+      "gdp_per_capita": "$1,950",
+      "economy_type": "Small, hydropower and mining"
+    },
+    "identity": "Landlocked Southeast Asian one-party state heavily indebted to China. Hydropower ambitions make it 'battery of Southeast Asia.' Small population, low profile.",
+    "strengths": ["Hydropower exports to Thailand and Vietnam", "China-Laos Railway connectivity", "Mineral resources", "Stable one-party governance"],
+    "weaknesses": ["Severe Chinese debt exposure", "Currency crisis, high inflation", "Small economic base", "Landlocked", "Low development indicators"],
+    "current_position": "Managing debt distress with Chinese forbearance; leveraging China-Laos Railway for transit revenue; hosting ASEAN summits; limited foreign policy ambition.",
+    "history_brief": "French Indochina. Independence 1953. Secret war during Vietnam era, heavy US bombing. Pathet Lao communist takeover 1975. One-party rule since. Chinese pivot intensified 2000s-2010s. China-Laos Railway opened 2021. Debt crisis 2022-present.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Dominant creditor, investor, railway partner"},
+        {"country": "VNM", "reason": "Ideological brother party, traditional ties"},
+        {"country": "THA", "reason": "Electricity customer, major trade partner"},
+        {"country": "JPN", "reason": "Aid and infrastructure"}
+      ],
+      "tensions": []
+    }
+  },
+  "BRN": {
+    "basic": {
+      "name": "Brunei",
+      "capital": "Bandar Seri Begawan",
+      "region": "Southeast Asia",
+      "government": "Absolute monarchy (sultanate)",
+      "languages": ["Malay"],
+      "currency": "Brunei Dollar (BND)"
+    },
+    "snapshot": {
+      "population": "460,000",
+      "gdp": "$17 billion",
+      "gdp_per_capita": "$37,000",
+      "economy_type": "Oil and gas-dependent, wealthy"
+    },
+    "identity": "Tiny oil-rich Borneo sultanate. Sultan Hassanal Bolkiah ruling since 1967, among the world's longest-reigning monarchs. Sharia-implementing Islamic state.",
+    "strengths": ["Oil and gas wealth per capita", "Political stability (monarchy)", "Welfare system", "Strategic Borneo location"],
+    "weaknesses": ["Extreme oil dependence", "Tiny diversification", "Small population limits", "Sharia law reputational issues"],
+    "current_position": "Gradual economic diversification efforts; low-profile ASEAN member; maintaining relations across divides; Sultan showing no signs of transitioning power.",
+    "history_brief": "Former Bornean empire. British protectorate 1888. Refused to join Malaysia 1963. Fully independent 1984. Sultan Hassanal Bolkiah on throne since 1967. Sharia penal code introduced 2014 (full implementation delayed after backlash).",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "MYS", "reason": "Neighbor, trade, Islamic ties"},
+        {"country": "SGP", "reason": "Close defense and economic partner"},
+        {"country": "CHN", "reason": "Investment, careful on South China Sea"},
+        {"country": "GBR", "reason": "Historic ties, Gurkha battalion stationed"},
+        {"country": "JPN", "reason": "Major LNG customer"}
+      ],
+      "tensions": []
+    }
+  },
+  "TLS": {
+    "basic": {
+      "name": "Timor-Leste",
+      "capital": "Dili",
+      "region": "Southeast Asia",
+      "government": "Semi-presidential republic",
+      "languages": ["Tetum", "Portuguese"],
+      "currency": "US Dollar (USD)"
+    },
+    "snapshot": {
+      "population": "1.3 million",
+      "gdp": "$2 billion",
+      "gdp_per_capita": "$1,500",
+      "economy_type": "Oil and gas, petroleum fund"
+    },
+    "identity": "Youngest Southeast Asian nation, independent only since 2002. Portuguese colonial legacy distinguishes it culturally. Awaits ASEAN accession (approved, implementation pending).",
+    "strengths": ["Petroleum Fund sovereign wealth ($18B)", "Youth population", "Democratic institutions relatively strong", "Catholic/Portuguese distinctive identity"],
+    "weaknesses": ["Extreme oil dependence (running down)", "Weak private sector", "Infrastructure gaps", "Limited economic diversification"],
+    "current_position": "Xanana Gusmão PM since 2023; ASEAN membership formally approved, working toward full accession; Greater Sunrise gas field negotiations with Australia; careful multi-alignment.",
+    "history_brief": "Portuguese colony 1702-1975. Brief independence then Indonesian invasion 1975 (massive civilian deaths). Independence referendum 1999 followed by UN transition. Fully independent May 2002. Crisis 2006. Stable since, with steady leaders Xanana Gusmão and José Ramos-Horta.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "AUS", "reason": "Greater Sunrise partner, major aid donor"},
+        {"country": "PRT", "reason": "Former colonizer, cultural and economic ties"},
+        {"country": "IDN", "reason": "Reconciled neighbor, largest trade partner"},
+        {"country": "CHN", "reason": "Investment and diplomatic engagement"},
+        {"country": "USA", "reason": "Diplomatic partnership"},
+        {"country": "JPN", "reason": "Aid and infrastructure"}
+      ],
+      "tensions": []
+    }
+  }
+}
+```
+
+---
+
+## 6. Component behavior specifications
+
+### 6.1 `app/page.tsx` (server component)
+
+Renders the `<GlobeView />` client component. Minimal page — just imports and renders. Full-viewport layout.
+
+### 6.2 `components/GlobeView.tsx` (client component)
+
+- Holds global state: `selectedCountry: string | null` (ISO-3 code), `hoveredCountry: string | null`.
+- Fetches `/data/world-110m.geojson` on mount.
+- Imports `countries.json` statically from `@/data/countries.json`.
+- Renders `<Globe>`, `<CountryPanel>`, `<Legend>`, `<HoverTooltip>` conditionally.
+- `Esc` keypress clears `selectedCountry`.
+
+### 6.3 `components/Globe.tsx`
+
+Dynamically imports `react-globe.gl` with `ssr: false`. Configuration:
+
+```tsx
+<Globe
+  globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg"
+  backgroundColor="#000010"
+  polygonsData={geoData.features}
+  polygonAltitude={0.01}
+  polygonCapColor={(feat) => getCountryColor(feat.properties.ADM0_A3, selectedCountry, countriesData)}
+  polygonSideColor={() => 'rgba(0, 0, 0, 0.15)'}
+  polygonStrokeColor={() => '#111'}
+  polygonLabel={/* returns null — we use our own tooltip */}
+  onPolygonHover={(feat) => setHovered(feat?.properties?.ADM0_A3 ?? null)}
+  onPolygonClick={(feat) => handleClick(feat.properties.ADM0_A3)}
+  polygonsTransitionDuration={400}
+  atmosphereColor="#60a5fa"
+  atmosphereAltitude={0.15}
+/>
+```
+
+### 6.4 `lib/colorMap.ts`
+
+```ts
+export function getCountryColor(
+  iso3: string,
+  selected: string | null,
+  data: CountriesData
+): string {
+  // Neutral when nothing selected
+  if (!selected) return 'rgba(100, 116, 139, 0.7)'; // slate-500
+  if (iso3 === selected) return 'rgba(59, 130, 246, 0.9)'; // blue-500
+
+  const sel = data[selected];
+  if (!sel) return 'rgba(51, 65, 85, 0.4)';
+
+  if (sel.relationships.allies.some(r => r.country === iso3))
+    return 'rgba(34, 197, 94, 0.8)'; // green-500
+  if (sel.relationships.working.some(r => r.country === iso3))
+    return 'rgba(249, 115, 22, 0.8)'; // orange-500
+  if (sel.relationships.tensions.some(r => r.country === iso3))
+    return 'rgba(239, 68, 68, 0.85)'; // red-500
+
+  return 'rgba(51, 65, 85, 0.4)'; // dimmed slate for non-related
+}
+```
+
+### 6.5 `components/HoverTooltip.tsx`
+
+Floating tooltip that follows cursor (use `mousemove` to track position). Shows:
+- Flag emoji + country name (large)
+- Capital (if in data)
+- Population (if in data)
+- If the country has a relationship with the selected country, show the `reason` line
+
+If the hovered country has no data entry in `countries.json`, show only the country name from GeoJSON properties.
+
+### 6.6 `components/CountryPanel.tsx`
+
+- Slide-in from right, ~420px wide. Fixed position. Backdrop-blur with dark semi-transparent bg.
+- Uses CSS `transform: translateX()` + `transition: transform 300ms ease-out`.
+- Header: flag emoji + country name + close button (X).
+- Tabs: Overview, Economy, Politics, History, Position, Relationships.
+- If `countries.json` has no entry for the country, show a friendly empty state: "No data for [Country] yet. Only Asian countries are populated in v1."
+- `Esc` key closes panel.
+
+### 6.7 Tab contents
+
+Populate each tab from the corresponding JSON fields:
+
+- **OverviewTab**: `basic` (all fields) + `snapshot` (population, gdp, gdp_per_capita, economy_type) + `identity` paragraph.
+- **EconomyTab**: `snapshot.gdp`, `snapshot.gdp_per_capita`, `snapshot.economy_type`. Repeat `strengths` and `weaknesses` filtered to economic-seeming items (or just show both lists under headings).
+- **PoliticsTab**: `basic.government`. For v1, derive political info from `current_position` and show a "Strategic Position" section there.
+- **HistoryTab**: `history_brief` rendered as prose.
+- **PositionTab**: `current_position` as prose + `strengths` and `weaknesses` as two columns.
+- **RelationshipsTab**: three sections (Allies / Working / Tensions), each listing country name + flag + reason. Clicking any listed country should update the `selectedCountry` state (so the panel and globe both change to that country).
+
+Not every tab needs to be radically different content. Accept redundancy across tabs — the point is clicking through different lenses.
+
+### 6.8 `components/Legend.tsx`
+
+Fixed bottom-left. Only visible when a country is selected. Shows color swatches:
+- Blue — Selected
+- Green — Ally
+- Orange — Working partner
+- Red — Tension
+
+### 6.9 Styling direction
+
+- Dark background (`#000010` or near-black).
+- Font: Instrument Serif for headings (Google Fonts), system sans for body. Import via `next/font/google`.
+- Panel: `bg-slate-900/80 backdrop-blur-md border border-slate-800`.
+- Generous spacing, small text, subtle borders. Apple-esque minimal.
+- Relationship colors in the UI should match the globe colors for consistency.
+
+---
+
+## 7. Execution plan — stop after each phase
+
+You may execute multiple phases before stopping, but stop and show progress at the end of each phase.
+
+### PHASE 0 — Scaffolding
+
+1. Initialize Next.js 14 with TypeScript and Tailwind: `npx create-next-app@latest . --typescript --tailwind --app --eslint --src-dir=false --import-alias="@/*"`
+2. Install `react-globe.gl`: `npm install react-globe.gl`
+3. Create the full directory structure from §4.
+4. Create `lib/types.ts` from §5.1.
+5. Create `lib/flags.ts` with the `isoToFlagEmoji` utility from §3.3.
+6. Create `lib/colorMap.ts` from §6.4.
+7. Create `data/countries.json` with the full JSON from §5.2.
+8. Create `public/data/` directory and download the Natural Earth GeoJSON:
+   ```bash
+   curl -L -o public/data/world-110m.geojson https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson
+   ```
+   Verify file is ~250KB and opens as valid JSON.
+9. Update `app/globals.css` with Tailwind directives and base body styles (dark background, overflow hidden, full viewport).
+10. Update `.gitignore` to include `.env*`, `node_modules`, `.next`.
+
+STOP. Show the file tree, the `package.json`, and confirm the GeoJSON file is present.
+
+### PHASE 1 — Globe rendering
+
+11. Build `components/Globe.tsx` using the config from §6.3. Dynamic import with `ssr: false`.
+12. Build `components/GlobeView.tsx` that fetches the GeoJSON, imports `countries.json`, and renders `<Globe>`.
+13. Update `app/page.tsx` to render `<GlobeView />` in a full-viewport div.
+14. Run `npm run dev`. Verify: globe renders, spins, can zoom/pan. All countries in neutral slate color.
+
+STOP. Describe what you see (or run a build test). Report any errors.
+
+### PHASE 2 — Hover tooltip
+
+15. Build `components/HoverTooltip.tsx` per §6.5. Listen to `mousemove` on the container.
+16. Wire `onPolygonHover` in `<Globe>` to update `hoveredCountry` state in `GlobeView`.
+17. Render tooltip conditionally when `hoveredCountry` is set.
+18. Verify tooltips show correctly for Asian countries (full data) and for non-Asian countries (name only).
+
+STOP. Report behavior.
+
+### PHASE 3 — Click and panel with Overview tab
+
+19. Build `components/CountryPanel.tsx` shell with tab navigation per §6.6.
+20. Build `components/tabs/OverviewTab.tsx` per §6.7.
+21. Other tabs: create stub components that render a "Coming soon" placeholder.
+22. Wire `onPolygonClick` to set `selectedCountry` in `GlobeView`.
+23. Panel slides in when `selectedCountry` is set. Close button and `Esc` key clear selection.
+24. Test with India (IND), China (CHN), and a non-Asian country (e.g., USA) to verify empty state.
+
+STOP. Report what works.
+
+### PHASE 4 — Relationship recoloring + Legend
+
+25. Wire `polygonCapColor` to use `getCountryColor` from `lib/colorMap.ts`.
+26. Verify clicking India: Pakistan and China go red, USA/Japan/UK/Germany/Australia go orange, Russia/France/Israel go green, rest go dim slate.
+27. Confirm `polygonsTransitionDuration={400}` animates the change smoothly.
+28. Build `components/Legend.tsx` per §6.8. Show only when `selectedCountry` is set.
+29. Update `HoverTooltip` to also show the relationship `reason` when hovering a related country.
+
+STOP. Report what works.
+
+### PHASE 5 — Remaining tabs
+
+30. Build out `EconomyTab`, `PoliticsTab`, `HistoryTab`, `PositionTab`, `RelationshipsTab` per §6.7.
+31. In `RelationshipsTab`, make clicking a listed country update `selectedCountry` (which should update the panel content and globe colors).
+32. Verify tab switching works smoothly.
+
+STOP. Report behavior.
+
+### PHASE 6 — Polish and deploy
+
+33. Loading state while GeoJSON is fetching (simple "Loading globe..." text, centered).
+34. Error boundary around `<Globe>` in case of Three.js failures.
+35. Font loading via `next/font/google` — Instrument Serif + Inter.
+36. Favicon (can be a minimal emoji-based one).
+37. README with:
+    - Project description
+    - Setup instructions (`npm install`, `npm run dev`)
+    - How to add country data (paste into `data/countries.json` following schema in `lib/types.ts`)
+    - Deployment note: push to main, Vercel auto-deploys
+38. Test production build locally: `npm run build && npm run start`.
+39. Commit everything, push to the `world-atlas` GitHub repo's `main` branch.
+40. User will connect the repo to Vercel manually (no action needed from you).
+
+STOP. Confirm build passes and summarize what's shipped.
+
+---
+
+## 8. Rules of engagement
+
+- After each phase, stop and show what you built. Don't barrel through to the end.
+- If a library or approach isn't working, say so — don't silently swap it for something else without confirming.
+- If you need a decision from the user, ask concisely and keep working on anything unblocked.
+- Keep components small. One component per file. No mega-files.
+- TypeScript strict mode on. Proper types, not `any`.
+- No test suite for v1. Ship first.
+- Do not modify `data/countries.json` content beyond what's in §5.2. Non-Asian countries are intentionally absent.
+- Do not add any paid service, trial service, or LLM API at any phase.
+
+Begin with Phase 0.
