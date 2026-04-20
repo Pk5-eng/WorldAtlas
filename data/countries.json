@@ -885,5 +885,190 @@
         {"country": "SYR", "reason": "Legacy tensions, border issues"}
       ]
     }
+  },
+  "SYR": {
+    "basic": {
+      "name": "Syria",
+      "capital": "Damascus",
+      "region": "West Asia",
+      "government": "Transitional government (post-Assad)",
+      "languages": ["Arabic"],
+      "currency": "Syrian Pound (SYP)"
+    },
+    "snapshot": {
+      "population": "23 million",
+      "gdp": "$23 billion (collapsed)",
+      "gdp_per_capita": "$1,000",
+      "economy_type": "War-shattered, transitioning"
+    },
+    "identity": "Transformed by December 2024 fall of Assad regime after 53 years of Ba'ath rule. Now under transitional government led by HTS-origin leadership navigating reconstruction and international legitimacy.",
+    "strengths": ["Educated diaspora potentially returning", "Strategic location", "Reconstruction opportunity", "End of Assad rule removes key barrier"],
+    "weaknesses": ["Devastated infrastructure", "Sectarian and ethnic fragmentation", "Kurdish/SDF northeast autonomy issues", "Unresolved minority rights", "Sanctions still in place", "HTS origin of new leadership"],
+    "current_position": "Transitional authority under Ahmad al-Sharaa building institutions; managing minority concerns (Alawites, Christians, Druze, Kurds); seeking sanctions relief and Gulf reconstruction money; Turkey and Gulf states key backers; Russia and Iran out.",
+    "history_brief": "French mandate, independent 1946. Ba'ath Party coup 1963. Hafez al-Assad 1970–2000. Bashar succeeded. Arab Spring protest 2011 became civil war. Russian and Iranian intervention kept Assad in power. HTS-led offensive December 2024 toppled Assad in days. Transitional period since.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "TUR", "reason": "Key external backer, border influence"},
+        {"country": "SAU", "reason": "Reconstruction funding, normalization"},
+        {"country": "QAT", "reason": "Supporter of transition"},
+        {"country": "ARE", "reason": "Engagement for regional stability"}
+      ],
+      "tensions": [
+        {"country": "ISR", "reason": "Post-Assad strikes, Golan and buffer zone"},
+        {"country": "IRN", "reason": "Lost ally, cut from regional network"},
+        {"country": "RUS", "reason": "Lost patronage, bases uncertain"}
+      ]
+    }
+  },
+  "ISR": {
+    "basic": {
+      "name": "Israel",
+      "capital": "Jerusalem (claimed)",
+      "region": "West Asia",
+      "government": "Parliamentary democracy",
+      "languages": ["Hebrew", "Arabic"],
+      "currency": "Israeli Shekel (ILS)"
+    },
+    "snapshot": {
+      "population": "9.9 million",
+      "gdp": "$525 billion",
+      "gdp_per_capita": "$53,000",
+      "economy_type": "Developed, high-tech dominant"
+    },
+    "identity": "Advanced high-tech democracy and regional military superpower. Transformed regional security in 2023–25 through Gaza war and degrading Iran's proxy network. Deep internal political divisions over judicial reform and post-war future.",
+    "strengths": ["Most advanced military in region (with nuclear)", "Unicorn-factory tech sector", "Intelligence services", "US strategic partnership", "Demonstrated ability to strike Iran directly"],
+    "weaknesses": ["Gaza humanitarian crisis reputational cost", "Deep political polarization", "Diplomatic isolation in Global South", "Hostage crisis and trauma", "Security-economy trade-off"],
+    "current_position": "Consolidating gains from degrading Hamas, Hezbollah, and Iran; West Bank tensions; Saudi normalization on hold; managing war's international fallout; Netanyahu government under political and legal pressure.",
+    "history_brief": "Founded 1948 after UN partition, Arab-Israeli war. Territorial expansion 1967 Six-Day War. Peace with Egypt 1979, Jordan 1994. Oslo process 1990s. Second Intifada. Gaza withdrawal 2005. Abraham Accords 2020. October 7 2023 Hamas attack triggered multi-front war reshaping region.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Unconditional military and diplomatic partnership"},
+        {"country": "ARE", "reason": "Abraham Accords, tech and defense"},
+        {"country": "BHR", "reason": "Abraham Accords"},
+        {"country": "IND", "reason": "Defense tech partnership"}
+      ],
+      "working": [
+        {"country": "JOR", "reason": "Peace treaty holds despite strain"},
+        {"country": "EGY", "reason": "Peace treaty, Gaza coordination"},
+        {"country": "DEU", "reason": "Historic obligation, strong support"},
+        {"country": "GBR", "reason": "Strong security cooperation"},
+        {"country": "AZE", "reason": "Quiet strategic partner near Iran"}
+      ],
+      "tensions": [
+        {"country": "IRN", "reason": "Direct military confrontation, existential enmity"},
+        {"country": "LBN", "reason": "Hezbollah aftermath, border"},
+        {"country": "SYR", "reason": "Strikes on post-Assad Syria, buffer zone"},
+        {"country": "YEM", "reason": "Houthi missile attacks"},
+        {"country": "TUR", "reason": "Erdogan's harsh Gaza rhetoric"}
+      ]
+    }
+  },
+  "TUR": {
+    "basic": {
+      "name": "Turkey",
+      "capital": "Ankara",
+      "region": "West Asia / Europe",
+      "government": "Presidential republic",
+      "languages": ["Turkish"],
+      "currency": "Turkish Lira (TRY)"
+    },
+    "snapshot": {
+      "population": "85.8 million",
+      "gdp": "$1.1 trillion",
+      "gdp_per_capita": "$12,800",
+      "economy_type": "Emerging, manufacturing and services"
+    },
+    "identity": "Transcontinental NATO member pursuing increasingly independent, assertive foreign policy under Erdogan. Regional power broker active from the Caucasus to Libya to Syria.",
+    "strengths": ["Large, capable military (2nd in NATO by personnel)", "Defense industry (Bayraktar drones)", "Strategic geography (straits)", "Manufacturing base", "Regional diplomatic reach"],
+    "weaknesses": ["Chronic lira depreciation and inflation", "Authoritarian drift under Erdogan", "Frosty EU accession", "Kurdish question", "Earthquake recovery burden"],
+    "current_position": "Kingmaker in post-Assad Syria; mediating Russia-Ukraine; holding up NATO expansion at times; economic orthodoxy returned under new finance team; Erdogan constitutional succession question looming.",
+    "history_brief": "Ottoman Empire collapse 1918. Republic 1923 under Ataturk. NATO member 1952. Coups in 1960, 1971, 1980. Erdogan's AKP from 2002. 2016 failed coup attempt. Shift toward presidential system 2017. Major regional interventions from 2016 (Syria, Libya, Karabakh).",
+    "relationships": {
+      "allies": [
+        {"country": "AZE", "reason": "One nation, two states — deep alliance"},
+        {"country": "QAT", "reason": "Strategic partnership, Turkish base"},
+        {"country": "PAK", "reason": "Defense and diplomatic alignment"}
+      ],
+      "working": [
+        {"country": "USA", "reason": "NATO ally despite frictions"},
+        {"country": "RUS", "reason": "Transactional — S-400, grain deals, Syria"},
+        {"country": "DEU", "reason": "Trade, large Turkish diaspora"},
+        {"country": "UKR", "reason": "Drones, mediator, Black Sea"},
+        {"country": "SAU", "reason": "Post-Khashoggi rapprochement"},
+        {"country": "SYR", "reason": "Key external backer of new government"}
+      ],
+      "tensions": [
+        {"country": "GRC", "reason": "Aegean disputes, Cyprus"},
+        {"country": "ARM", "reason": "Historical genocide denial, closed border"},
+        {"country": "ISR", "reason": "Gaza war rhetoric, political break"}
+      ]
+    }
+  },
+  "KAZ": {
+    "basic": {
+      "name": "Kazakhstan",
+      "capital": "Astana",
+      "region": "Central Asia",
+      "government": "Presidential republic (authoritarian)",
+      "languages": ["Kazakh", "Russian"],
+      "currency": "Kazakhstani Tenge (KZT)"
+    },
+    "snapshot": {
+      "population": "20.3 million",
+      "gdp": "$265 billion",
+      "gdp_per_capita": "$13,000",
+      "economy_type": "Oil, gas, and minerals"
+    },
+    "identity": "Largest Central Asian state and resource giant. Pursues multi-vector foreign policy balancing Russia, China, and the West. Post-2022 quiet distancing from Moscow.",
+    "strengths": ["Huge oil, gas, and uranium reserves", "Strategic Belt and Road location", "Largest economy in Central Asia", "Multi-vector diplomacy success"],
+    "weaknesses": ["Russian economic and pipeline dependence", "Income inequality", "Authoritarian governance limits reform", "Exposure to Chinese influence", "2022 unrest revealed instability"],
+    "current_position": "Carefully distancing from Russia without breaking ties; attracting Western investment fleeing Russia; hosting diplomatic initiatives; Tokayev consolidating power post-Nazarbayev era.",
+    "history_brief": "Soviet republic. Independence 1991 under Nazarbayev who ruled until 2019. Capital moved to Astana 1997. Oil wealth drove growth. Bloody January 2022 unrest gave Tokayev opportunity to sideline Nazarbayev family. Ukraine war accelerated pivot.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "RUS", "reason": "Deep historic and energy ties, transit routes"},
+        {"country": "CHN", "reason": "Major investor, Belt and Road hub"},
+        {"country": "USA", "reason": "Growing partner, critical minerals"},
+        {"country": "TUR", "reason": "Turkic cultural bloc, growing ties"},
+        {"country": "DEU", "reason": "Major EU trade partner"},
+        {"country": "UZB", "reason": "Central Asian regional cooperation"}
+      ],
+      "tensions": []
+    }
+  },
+  "UZB": {
+    "basic": {
+      "name": "Uzbekistan",
+      "capital": "Tashkent",
+      "region": "Central Asia",
+      "government": "Presidential republic (reforming)",
+      "languages": ["Uzbek"],
+      "currency": "Uzbekistani Som (UZS)"
+    },
+    "snapshot": {
+      "population": "36.8 million",
+      "gdp": "$103 billion",
+      "gdp_per_capita": "$2,800",
+      "economy_type": "Emerging, agriculture and industry"
+    },
+    "identity": "Most populous Central Asian state. Emerging from decades of Karimov isolation under reformist Mirziyoyev. Opening economy and seeking regional integration.",
+    "strengths": ["Largest Central Asian population and market", "Gold and cotton production", "Strategic central location", "Reform momentum, tourism opening", "Samarkand/Bukhara heritage"],
+    "weaknesses": ["Doubly landlocked", "Legacy of forced cotton labor", "Authoritarian governance limits", "Water scarcity (Aral Sea legacy)", "Youth unemployment"],
+    "current_position": "Deepening regional integration (Samarkand SCO summit); attracting Western investment as alternative to Russia; balancing all major powers; managing cotton reform and Karakalpak autonomy questions.",
+    "history_brief": "Timurid empire heritage. Soviet republic. Independence 1991 under Karimov who ruled until death 2016. Mirziyoyev succeeded and pursued reforms: currency liberalization, political opening, foreign policy normalization. Karakalpakstan protests 2022. 2023 constitutional reform extended presidential term.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "RUS", "reason": "Historical ties, labor migration"},
+        {"country": "CHN", "reason": "Major investor, BRI"},
+        {"country": "KAZ", "reason": "Regional cooperation, trade"},
+        {"country": "TUR", "reason": "Turkic bloc, growing economic ties"},
+        {"country": "KOR", "reason": "Investment and labor migration destination"},
+        {"country": "USA", "reason": "C5+1 framework, reforms support"}
+      ],
+      "tensions": []
+    }
   }
 }
