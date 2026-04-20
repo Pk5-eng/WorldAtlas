@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { FeatureCollection, Feature } from 'geojson';
 import Globe from './Globe';
+import HoverTooltip from './HoverTooltip';
 import countriesData from '@/data/countries.json';
 import type { CountriesData } from '@/lib/types';
 
@@ -17,10 +18,16 @@ type CountryFeature = Feature & {
   };
 };
 
+type HoverInfo = {
+  iso3: string;
+  iso2?: string;
+  fallbackName?: string;
+};
+
 export default function GlobeView() {
   const [features, setFeatures] = useState<CountryFeature[] | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [, setHoveredCountry] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<HoverInfo | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,8 +67,28 @@ export default function GlobeView() {
         features={features}
         countriesData={countriesData as CountriesData}
         selectedCountry={selectedCountry}
-        onHover={setHoveredCountry}
+        onHover={(feat) => {
+          if (!feat) {
+            setHovered(null);
+            return;
+          }
+          const iso3 = feat.properties?.ADM0_A3;
+          if (!iso3) {
+            setHovered(null);
+            return;
+          }
+          setHovered({
+            iso3,
+            iso2: feat.properties?.ISO_A2,
+            fallbackName: feat.properties?.NAME_LONG ?? feat.properties?.NAME,
+          });
+        }}
         onSelect={setSelectedCountry}
+      />
+      <HoverTooltip
+        hovered={hovered}
+        selectedCountry={selectedCountry}
+        countriesData={countriesData as CountriesData}
       />
     </div>
   );
