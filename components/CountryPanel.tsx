@@ -26,6 +26,7 @@ type CountryPanelProps = {
   countriesData: CountriesData;
   iso2ByIso3: Record<string, string>;
   fallbackNameByIso3: Record<string, string>;
+  onSelectCountry: (iso3: string) => void;
   onClose: () => void;
 };
 
@@ -34,6 +35,7 @@ export default function CountryPanel({
   countriesData,
   iso2ByIso3,
   fallbackNameByIso3,
+  onSelectCountry,
   onClose,
 }: CountryPanelProps) {
   const open = selectedCountry !== null;
@@ -71,7 +73,14 @@ export default function CountryPanel({
       </header>
 
       {data ? (
-        <PanelBody key={selectedCountry ?? 'none'} data={data} />
+        <PanelBody
+          key={selectedCountry ?? 'none'}
+          data={data}
+          countriesData={countriesData}
+          iso2ByIso3={iso2ByIso3}
+          fallbackNameByIso3={fallbackNameByIso3}
+          onSelectCountry={onSelectCountry}
+        />
       ) : (
         <div className="flex flex-1 items-center justify-center px-6">
           <p className="text-center text-sm text-slate-400">
@@ -85,7 +94,19 @@ export default function CountryPanel({
   );
 }
 
-function PanelBody({ data }: { data: CountryData }) {
+function PanelBody({
+  data,
+  countriesData,
+  iso2ByIso3,
+  fallbackNameByIso3,
+  onSelectCountry,
+}: {
+  data: CountryData;
+  countriesData: CountriesData;
+  iso2ByIso3: Record<string, string>;
+  fallbackNameByIso3: Record<string, string>;
+  onSelectCountry: (iso3: string) => void;
+}) {
   const [tab, setTab] = useState<TabId>('overview');
   return (
     <>
@@ -114,7 +135,15 @@ function PanelBody({ data }: { data: CountryData }) {
         {tab === 'politics' && <PoliticsTab data={data} />}
         {tab === 'history' && <HistoryTab data={data} />}
         {tab === 'position' && <PositionTab data={data} />}
-        {tab === 'relationships' && <RelationshipsTab data={data} />}
+        {tab === 'relationships' && (
+          <RelationshipsTab
+            data={data}
+            countriesData={countriesData}
+            iso2ByIso3={iso2ByIso3}
+            fallbackNameByIso3={fallbackNameByIso3}
+            onSelectCountry={onSelectCountry}
+          />
+        )}
       </div>
     </>
   );

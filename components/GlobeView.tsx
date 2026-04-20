@@ -112,6 +112,7 @@ export default function GlobeView() {
         countriesData={countriesData as CountriesData}
         iso2ByIso3={iso2ByIso3}
         fallbackNameByIso3={fallbackNameByIso3}
+        onSelectCountry={setSelectedCountry}
         onClose={() => setSelectedCountry(null)}
       />
       <Legend visible={selectedCountry !== null} />
