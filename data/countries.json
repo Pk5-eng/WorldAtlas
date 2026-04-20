@@ -1420,5 +1420,136 @@
         {"country": "BGD", "reason": "Rohingya refugee crisis, border instability"}
       ]
     }
+  },
+  "KHM": {
+    "basic": {
+      "name": "Cambodia",
+      "capital": "Phnom Penh",
+      "region": "Southeast Asia",
+      "government": "Constitutional monarchy, one-party dominant",
+      "languages": ["Khmer"],
+      "currency": "Cambodian Riel (KHR)"
+    },
+    "snapshot": {
+      "population": "17 million",
+      "gdp": "$47 billion",
+      "gdp_per_capita": "$2,800",
+      "economy_type": "Garments, tourism, construction"
+    },
+    "identity": "Post-Khmer Rouge state under Hun family dynastic rule. Effectively a Chinese client state. Economy driven by garment exports and tourism to Angkor.",
+    "strengths": ["Garment industry", "Angkor tourism", "Chinese investment inflow", "Young population"],
+    "weaknesses": ["Deep authoritarian governance", "Corruption", "Scam compound industry", "Dependence on China", "Weak institutions"],
+    "current_position": "Hun Manet succeeded father Hun Sen as PM 2023 (father remains senator president); deepening Chinese ties (Ream naval base controversy); cyber-scam industry huge issue; Funan Techo Canal project with China.",
+    "history_brief": "French colony. Independence 1953. Khmer Rouge genocide 1975-79 (1.5-2M killed). Vietnamese intervention ended it. UN transition 1991-93. Hun Sen ruled since 1985 in various capacities. Son Hun Manet elevated 2023.",
+    "relationships": {
+      "allies": [
+        {"country": "CHN", "reason": "De facto patron, huge investment, military access"}
+      ],
+      "working": [
+        {"country": "VNM", "reason": "Historical intervener, regional partner"},
+        {"country": "JPN", "reason": "Aid and investment"},
+        {"country": "KOR", "reason": "Investment"},
+        {"country": "THA", "reason": "Neighbor, trade, occasional friction"}
+      ],
+      "tensions": [
+        {"country": "USA", "reason": "Sanctions over Ream base, democratic backsliding"}
+      ]
+    }
+  },
+  "LAO": {
+    "basic": {
+      "name": "Laos",
+      "capital": "Vientiane",
+      "region": "Southeast Asia",
+      "government": "One-party socialist republic",
+      "languages": ["Lao"],
+      "currency": "Lao Kip (LAK)"
+    },
+    "snapshot": {
+      "population": "7.7 million",
+      "gdp": "$15 billion",
+      "gdp_per_capita": "$1,950",
+      "economy_type": "Small, hydropower and mining"
+    },
+    "identity": "Landlocked Southeast Asian one-party state heavily indebted to China. Hydropower ambitions make it 'battery of Southeast Asia.' Small population, low profile.",
+    "strengths": ["Hydropower exports to Thailand and Vietnam", "China-Laos Railway connectivity", "Mineral resources", "Stable one-party governance"],
+    "weaknesses": ["Severe Chinese debt exposure", "Currency crisis, high inflation", "Small economic base", "Landlocked", "Low development indicators"],
+    "current_position": "Managing debt distress with Chinese forbearance; leveraging China-Laos Railway for transit revenue; hosting ASEAN summits; limited foreign policy ambition.",
+    "history_brief": "French Indochina. Independence 1953. Secret war during Vietnam era, heavy US bombing. Pathet Lao communist takeover 1975. One-party rule since. Chinese pivot intensified 2000s-2010s. China-Laos Railway opened 2021. Debt crisis 2022-present.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Dominant creditor, investor, railway partner"},
+        {"country": "VNM", "reason": "Ideological brother party, traditional ties"},
+        {"country": "THA", "reason": "Electricity customer, major trade partner"},
+        {"country": "JPN", "reason": "Aid and infrastructure"}
+      ],
+      "tensions": []
+    }
+  },
+  "BRN": {
+    "basic": {
+      "name": "Brunei",
+      "capital": "Bandar Seri Begawan",
+      "region": "Southeast Asia",
+      "government": "Absolute monarchy (sultanate)",
+      "languages": ["Malay"],
+      "currency": "Brunei Dollar (BND)"
+    },
+    "snapshot": {
+      "population": "460,000",
+      "gdp": "$17 billion",
+      "gdp_per_capita": "$37,000",
+      "economy_type": "Oil and gas-dependent, wealthy"
+    },
+    "identity": "Tiny oil-rich Borneo sultanate. Sultan Hassanal Bolkiah ruling since 1967, among the world's longest-reigning monarchs. Sharia-implementing Islamic state.",
+    "strengths": ["Oil and gas wealth per capita", "Political stability (monarchy)", "Welfare system", "Strategic Borneo location"],
+    "weaknesses": ["Extreme oil dependence", "Tiny diversification", "Small population limits", "Sharia law reputational issues"],
+    "current_position": "Gradual economic diversification efforts; low-profile ASEAN member; maintaining relations across divides; Sultan showing no signs of transitioning power.",
+    "history_brief": "Former Bornean empire. British protectorate 1888. Refused to join Malaysia 1963. Fully independent 1984. Sultan Hassanal Bolkiah on throne since 1967. Sharia penal code introduced 2014 (full implementation delayed after backlash).",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "MYS", "reason": "Neighbor, trade, Islamic ties"},
+        {"country": "SGP", "reason": "Close defense and economic partner"},
+        {"country": "CHN", "reason": "Investment, careful on South China Sea"},
+        {"country": "GBR", "reason": "Historic ties, Gurkha battalion stationed"},
+        {"country": "JPN", "reason": "Major LNG customer"}
+      ],
+      "tensions": []
+    }
+  },
+  "TLS": {
+    "basic": {
+      "name": "Timor-Leste",
+      "capital": "Dili",
+      "region": "Southeast Asia",
+      "government": "Semi-presidential republic",
+      "languages": ["Tetum", "Portuguese"],
+      "currency": "US Dollar (USD)"
+    },
+    "snapshot": {
+      "population": "1.3 million",
+      "gdp": "$2 billion",
+      "gdp_per_capita": "$1,500",
+      "economy_type": "Oil and gas, petroleum fund"
+    },
+    "identity": "Youngest Southeast Asian nation, independent only since 2002. Portuguese colonial legacy distinguishes it culturally. Awaits ASEAN accession (approved, implementation pending).",
+    "strengths": ["Petroleum Fund sovereign wealth ($18B)", "Youth population", "Democratic institutions relatively strong", "Catholic/Portuguese distinctive identity"],
+    "weaknesses": ["Extreme oil dependence (running down)", "Weak private sector", "Infrastructure gaps", "Limited economic diversification"],
+    "current_position": "Xanana Gusmão PM since 2023; ASEAN membership formally approved, working toward full accession; Greater Sunrise gas field negotiations with Australia; careful multi-alignment.",
+    "history_brief": "Portuguese colony 1702-1975. Brief independence then Indonesian invasion 1975 (massive civilian deaths). Independence referendum 1999 followed by UN transition. Fully independent May 2002. Crisis 2006. Stable since, with steady leaders Xanana Gusmão and José Ramos-Horta.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "AUS", "reason": "Greater Sunrise partner, major aid donor"},
+        {"country": "PRT", "reason": "Former colonizer, cultural and economic ties"},
+        {"country": "IDN", "reason": "Reconciled neighbor, largest trade partner"},
+        {"country": "CHN", "reason": "Investment and diplomatic engagement"},
+        {"country": "USA", "reason": "Diplomatic partnership"},
+        {"country": "JPN", "reason": "Aid and infrastructure"}
+      ],
+      "tensions": []
+    }
   }
 }
