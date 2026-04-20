@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { FeatureCollection, Feature } from 'geojson';
 import Globe from './Globe';
 import HoverTooltip from './HoverTooltip';
+import CountryPanel from './CountryPanel';
 import countriesData from '@/data/countries.json';
 import type { CountriesData } from '@/lib/types';
 
@@ -53,6 +54,21 @@ export default function GlobeView() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  const { iso2ByIso3, fallbackNameByIso3 } = useMemo(() => {
+    const iso2Map: Record<string, string> = {};
+    const nameMap: Record<string, string> = {};
+    if (!features) return { iso2ByIso3: iso2Map, fallbackNameByIso3: nameMap };
+    for (const f of features) {
+      const iso3 = f.properties?.ADM0_A3;
+      if (!iso3) continue;
+      const iso2 = f.properties?.ISO_A2;
+      if (iso2 && iso2 !== '-99' && !iso2Map[iso3]) iso2Map[iso3] = iso2;
+      const name = f.properties?.NAME_LONG ?? f.properties?.NAME;
+      if (name && !nameMap[iso3]) nameMap[iso3] = name;
+    }
+    return { iso2ByIso3: iso2Map, fallbackNameByIso3: nameMap };
+  }, [features]);
+
   if (!features) {
     return (
       <div className="flex h-full w-full items-center justify-center text-slate-400">
@@ -89,6 +105,13 @@ export default function GlobeView() {
         hovered={hovered}
         selectedCountry={selectedCountry}
         countriesData={countriesData as CountriesData}
+      />
+      <CountryPanel
+        selectedCountry={selectedCountry}
+        countriesData={countriesData as CountriesData}
+        iso2ByIso3={iso2ByIso3}
+        fallbackNameByIso3={fallbackNameByIso3}
+        onClose={() => setSelectedCountry(null)}
       />
     </div>
   );
