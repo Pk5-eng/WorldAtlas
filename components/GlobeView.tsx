@@ -5,6 +5,7 @@ import type { FeatureCollection, Feature } from 'geojson';
 import Globe from './Globe';
 import HoverTooltip from './HoverTooltip';
 import CountryPanel from './CountryPanel';
+import Legend from './Legend';
 import countriesData from '@/data/countries.json';
 import type { CountriesData } from '@/lib/types';
 
@@ -113,6 +114,7 @@ export default function GlobeView() {
         fallbackNameByIso3={fallbackNameByIso3}
         onClose={() => setSelectedCountry(null)}
       />
+      <Legend visible={selectedCountry !== null} />
     </div>
   );
 }
