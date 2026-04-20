@@ -23,7 +23,7 @@ type GlobeProps = {
   features: CountryFeature[];
   countriesData: CountriesData;
   selectedCountry: string | null;
-  onHover: (iso3: string | null) => void;
+  onHover: (feat: CountryFeature | null) => void;
   onSelect: (iso3: string) => void;
 };
 
@@ -61,8 +61,7 @@ export default function Globe({
       polygonStrokeColor={() => '#111'}
       polygonLabel={() => ''}
       onPolygonHover={(feat: object | null) => {
-        const iso3 = (feat as CountryFeature | null)?.properties?.ADM0_A3 ?? null;
-        onHover(iso3);
+        onHover((feat as CountryFeature | null) ?? null);
       }}
       onPolygonClick={(feat: object) => {
         const iso3 = (feat as CountryFeature).properties?.ADM0_A3;
