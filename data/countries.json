@@ -363,5 +363,172 @@
       ],
       "tensions": []
     }
+  },
+  "NPL": {
+    "basic": {
+      "name": "Nepal",
+      "capital": "Kathmandu",
+      "region": "South Asia",
+      "government": "Federal parliamentary republic",
+      "languages": ["Nepali"],
+      "currency": "Nepalese Rupee (NPR)"
+    },
+    "snapshot": {
+      "population": "30.5 million",
+      "gdp": "$44 billion",
+      "gdp_per_capita": "$1,440",
+      "economy_type": "Developing, remittance-dependent"
+    },
+    "identity": "Himalayan republic wedged between India and China. Chronic political instability with frequent government changes. Remittances from migrant workers keep the economy afloat.",
+    "strengths": ["Hydropower potential", "Tourism (Everest, Buddhist heritage)", "Strategic buffer position", "Large diaspora remittances"],
+    "weaknesses": ["Political instability (frequent PM changes)", "Earthquake vulnerability", "Landlocked, infrastructure gaps", "Heavy remittance dependence", "Youth outmigration"],
+    "current_position": "Balancing India (open border, cultural ties) and China (infrastructure, BRI member); hydropower export deals with India; periodic territorial frictions over Kalapani region.",
+    "history_brief": "Unified in 18th century under Shah dynasty. Rana autocracy. Constitutional monarchy. Maoist insurgency 1996–2006 killed ~17,000. Monarchy abolished 2008, federal republic established 2015. Revolving-door coalitions since.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "IND", "reason": "Open border, dominant trade partner, cultural ties"},
+        {"country": "CHN", "reason": "BRI investment, infrastructure, counterweight"},
+        {"country": "USA", "reason": "MCC compact, aid"},
+        {"country": "GBR", "reason": "Historical ties, Gurkha connection"}
+      ],
+      "tensions": []
+    }
+  },
+  "BTN": {
+    "basic": {
+      "name": "Bhutan",
+      "capital": "Thimphu",
+      "region": "South Asia",
+      "government": "Constitutional monarchy",
+      "languages": ["Dzongkha"],
+      "currency": "Bhutanese Ngultrum (BTN)"
+    },
+    "snapshot": {
+      "population": "780,000",
+      "gdp": "$3 billion",
+      "gdp_per_capita": "$3,850",
+      "economy_type": "Small, hydropower and tourism"
+    },
+    "identity": "Small Himalayan kingdom known for Gross National Happiness philosophy. Deeply aligned with India for security and economy. No formal diplomatic ties with China despite shared border.",
+    "strengths": ["Hydropower exports to India", "High-value low-volume tourism", "Political stability", "Environmental protection", "Strong national identity"],
+    "weaknesses": ["Tiny domestic market", "Heavy India dependence", "Youth unemployment", "Emigration of skilled workers", "Narrow economic base"],
+    "current_position": "Quietly negotiating border demarcation with China; expanding Gelephu Mindfulness City project; maintaining close India security partnership amid Chinese pressure.",
+    "history_brief": "Unified in 17th century. Treaty with British India 1910. Treaty with independent India 1949. Monarchy introduced democracy in 2008. Fourth king's GNH philosophy globally influential. Fifth king now on throne.",
+    "relationships": {
+      "allies": [
+        {"country": "IND", "reason": "Security treaty, dominant economic partner"}
+      ],
+      "working": [
+        {"country": "BGD", "reason": "Hydropower potential, trade"},
+        {"country": "JPN", "reason": "Aid and development support"}
+      ],
+      "tensions": [
+        {"country": "CHN", "reason": "Unresolved border, no formal ties"}
+      ]
+    }
+  },
+  "MDV": {
+    "basic": {
+      "name": "Maldives",
+      "capital": "Malé",
+      "region": "South Asia",
+      "government": "Presidential republic",
+      "languages": ["Dhivehi"],
+      "currency": "Maldivian Rufiyaa (MVR)"
+    },
+    "snapshot": {
+      "population": "520,000",
+      "gdp": "$7 billion",
+      "gdp_per_capita": "$13,500",
+      "economy_type": "Tourism-dependent, small"
+    },
+    "identity": "Tiny Indian Ocean archipelago strategically contested by India and China. Luxury tourism drives the economy. Climate change is an existential threat to its low-lying islands.",
+    "strengths": ["Luxury tourism brand", "Strategic Indian Ocean location", "Marine resources"],
+    "weaknesses": ["Extreme climate vulnerability", "Tourism concentration risk", "Rising public debt", "Political polarization", "Import dependence"],
+    "current_position": "Under Muizzu government, tilting toward China and away from India ('India Out' policy); reducing Indian military presence; deepening Chinese investment and infrastructure.",
+    "history_brief": "Sultanate for centuries. British protectorate 1887–1965. Republic 1968. Gayoom authoritarian rule 1978–2008. Democratic transitions since with frequent reversals. Gradual China alignment accelerated under Muizzu from 2023.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Growing preferred partner under current government"},
+        {"country": "IND", "reason": "Historic partner, now strained but still major"},
+        {"country": "SAU", "reason": "Religious ties, investment"},
+        {"country": "TUR", "reason": "Growing cooperation"}
+      ],
+      "tensions": []
+    }
+  },
+  "AFG": {
+    "basic": {
+      "name": "Afghanistan",
+      "capital": "Kabul",
+      "region": "South Asia",
+      "government": "Islamic Emirate under Taliban",
+      "languages": ["Pashto", "Dari"],
+      "currency": "Afghan Afghani (AFN)"
+    },
+    "snapshot": {
+      "population": "42 million",
+      "gdp": "$16 billion",
+      "gdp_per_capita": "$380",
+      "economy_type": "Collapsed formal economy, aid and opium"
+    },
+    "identity": "Landlocked South-Central Asian state under Taliban rule since August 2021. Unrecognized by any major power. Humanitarian crisis with severe restrictions on women's rights.",
+    "strengths": ["Mineral wealth (largely unexploited)", "Strategic location", "Cohesive Taliban command after takeover"],
+    "weaknesses": ["International isolation and sanctions", "Humanitarian crisis, aid dependent", "Women's rights collapse", "Frozen central bank reserves", "ISKP insurgency"],
+    "current_position": "Taliban consolidating rule without international recognition; tensions with Pakistan over TTP; cautious engagement from China, Russia, and regional states; severe gender apartheid.",
+    "history_brief": "Great Game buffer state. Soviet invasion 1979–89. Civil war, Taliban takeover 1996. US-led invasion 2001 after 9/11. 20-year republic collapsed August 2021 as US withdrew. Taliban back in power.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "CHN", "reason": "Pragmatic engagement, minerals, BRI interest"},
+        {"country": "RUS", "reason": "Diplomatic engagement, regional stability"},
+        {"country": "QAT", "reason": "Diplomatic intermediary"},
+        {"country": "IRN", "reason": "Complex neighbor engagement"}
+      ],
+      "tensions": [
+        {"country": "PAK", "reason": "TTP sheltering disputes, border clashes"},
+        {"country": "USA", "reason": "Sanctions, frozen assets"}
+      ]
+    }
+  },
+  "IRN": {
+    "basic": {
+      "name": "Iran",
+      "capital": "Tehran",
+      "region": "West Asia",
+      "government": "Islamic theocratic republic",
+      "languages": ["Persian"],
+      "currency": "Iranian Rial (IRR)"
+    },
+    "snapshot": {
+      "population": "89 million",
+      "gdp": "$400 billion (sanctions-affected)",
+      "gdp_per_capita": "$4,500",
+      "economy_type": "Oil and gas, state-dominated, sanctioned"
+    },
+    "identity": "Shia theocracy and regional power projecting influence through proxies across the Middle East. In direct confrontation with Israel, US, and Arab rivals. Near-threshold nuclear state.",
+    "strengths": ["Oil and gas reserves (vast)", "Regional proxy network (Axis of Resistance)", "Educated population", "Missile and drone capability", "Strategic geography"],
+    "weaknesses": ["Sanctions-crippled economy", "Unpopular regime, protest waves", "Brain drain", "Proxy network degraded by Israel", "Currency collapse"],
+    "current_position": "Regional position severely weakened after Israeli campaigns against Hamas, Hezbollah, and direct strikes on Iran; Assad fall in Syria cut Hezbollah supply lines; nuclear program decisions looming; domestic protests recurring.",
+    "history_brief": "Persian Empire. Constitutional Revolution 1906. Pahlavi dynasty, CIA-backed coup 1953 restored Shah. Islamic Revolution 1979 under Khomeini. Iran-Iraq War 1980–88. Nuclear deal 2015, US withdrawal 2018. Mahsa Amini protests 2022. Regional setbacks 2023–25.",
+    "relationships": {
+      "allies": [
+        {"country": "RUS", "reason": "Strategic partnership, drone supply, anti-US alignment"},
+        {"country": "CHN", "reason": "Oil customer, strategic partnership"},
+        {"country": "SYR", "reason": "Historic ally, though weakened by Assad fall"}
+      ],
+      "working": [
+        {"country": "IRQ", "reason": "Influence through Shia political forces"},
+        {"country": "VEN", "reason": "Anti-US solidarity, oil cooperation"},
+        {"country": "PRK", "reason": "Missile tech exchange"}
+      ],
+      "tensions": [
+        {"country": "USA", "reason": "Sanctions, proxy conflicts, nuclear standoff"},
+        {"country": "ISR", "reason": "Direct military confrontation, existential rivalry"},
+        {"country": "SAU", "reason": "Sectarian rivalry despite recent normalization"}
+      ]
+    }
   }
 }
