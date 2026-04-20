@@ -711,5 +711,179 @@
         {"country": "IRQ", "reason": "Residual from 1990 invasion, ongoing claims issues"}
       ]
     }
+  },
+  "OMN": {
+    "basic": {
+      "name": "Oman",
+      "capital": "Muscat",
+      "region": "West Asia",
+      "government": "Absolute monarchy (sultanate)",
+      "languages": ["Arabic"],
+      "currency": "Omani Rial (OMR)"
+    },
+    "snapshot": {
+      "population": "4.7 million",
+      "gdp": "$110 billion",
+      "gdp_per_capita": "$23,500",
+      "economy_type": "Oil and gas, diversifying"
+    },
+    "identity": "Gulf state with distinctive neutralist foreign policy. Ibadi Islam (neither Sunni nor Shia) enables mediator role between Iran and West. Strategic Strait of Hormuz location.",
+    "strengths": ["Strategic location at Strait of Hormuz", "Diplomatic neutrality as convener", "Political stability", "Tourism potential", "Good US and Iran relations"],
+    "weaknesses": ["Oil dependence", "Fiscal pressures", "Youth unemployment", "Smaller reserves than neighbors"],
+    "current_position": "Continuing mediator role (Iran-US backchannels); Vision 2040 diversification; cautious of regional conflict spillover; steady Sultan Haitham leadership since 2020.",
+    "history_brief": "Maritime empire from Zanzibar to Balochistan. Isolated under Sultan Said bin Taimur until son Qaboos overthrew him 1970. Qaboos modernized in 50-year rule until death 2020. Haitham bin Tariq now sultan, pursuing measured reforms.",
+    "relationships": {
+      "allies": [
+        {"country": "GBR", "reason": "Historic ties, defense cooperation"}
+      ],
+      "working": [
+        {"country": "USA", "reason": "Strategic partner, access agreements"},
+        {"country": "SAU", "reason": "Gulf partner despite past distance"},
+        {"country": "IRN", "reason": "Unique working relationship among Gulf states"},
+        {"country": "IND", "reason": "Trade, expat community, defense"},
+        {"country": "CHN", "reason": "Port investment (Duqm), oil customer"}
+      ],
+      "tensions": []
+    }
+  },
+  "BHR": {
+    "basic": {
+      "name": "Bahrain",
+      "capital": "Manama",
+      "region": "West Asia",
+      "government": "Constitutional monarchy (practically absolute)",
+      "languages": ["Arabic"],
+      "currency": "Bahraini Dinar (BHD)"
+    },
+    "snapshot": {
+      "population": "1.5 million",
+      "gdp": "$45 billion",
+      "gdp_per_capita": "$30,000",
+      "economy_type": "Financial services, declining oil"
+    },
+    "identity": "Small island kingdom with Sunni monarchy ruling Shia-majority population. US Fifth Fleet headquarters. Closely aligned with Saudi Arabia.",
+    "strengths": ["Financial services hub historically", "US Fifth Fleet base", "Saudi financial backing", "Early diversification"],
+    "weaknesses": ["Sectarian tensions (Sunni rule, Shia majority)", "Declining oil reserves", "Regional competition from Dubai", "Vulnerable to Iranian influence"],
+    "current_position": "Firmly in Saudi-UAE camp; maintained Abraham Accords with Israel despite Gaza; US base critical; periodic Shia unrest suppressed.",
+    "history_brief": "Al Khalifa family since 18th century. British protectorate until 1971 independence. Arab Spring protests 2011 (Shia-led) crushed with Saudi help. Abraham Accords with Israel 2020. Ongoing sectarian undertow.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Fifth Fleet HQ, major non-NATO ally"},
+        {"country": "SAU", "reason": "Protector and political backer"},
+        {"country": "ARE", "reason": "Close Gulf partner"},
+        {"country": "ISR", "reason": "Abraham Accords"}
+      ],
+      "working": [
+        {"country": "GBR", "reason": "Historic ties, naval base"},
+        {"country": "EGY", "reason": "Political alignment"}
+      ],
+      "tensions": [
+        {"country": "IRN", "reason": "Accusations of backing Shia opposition"}
+      ]
+    }
+  },
+  "YEM": {
+    "basic": {
+      "name": "Yemen",
+      "capital": "Sana'a (Houthi-controlled), Aden (government)",
+      "region": "West Asia",
+      "government": "Divided: internationally recognized government vs Houthi movement",
+      "languages": ["Arabic"],
+      "currency": "Yemeni Rial (YER)"
+    },
+    "snapshot": {
+      "population": "34 million",
+      "gdp": "$21 billion",
+      "gdp_per_capita": "$620",
+      "economy_type": "Collapsed, humanitarian emergency"
+    },
+    "identity": "Poorest Arab country, fractured by civil war since 2014. Houthi movement controls north including capital, disrupting Red Sea shipping. One of the world's worst humanitarian crises.",
+    "strengths": ["Strategic location at Bab el-Mandeb", "Young population", "Historical trading culture"],
+    "weaknesses": ["Civil war, divided state", "Humanitarian catastrophe", "Famine risk", "Collapsed institutions", "Houthi missile arsenal"],
+    "current_position": "Houthis disrupting Red Sea shipping with attacks on vessels in solidarity with Gaza; absorbing US-UK strikes; Saudi-Houthi peace process paused; humanitarian crisis severe.",
+    "history_brief": "North and South Yemen unified 1990. Ali Abdullah Saleh ruled until 2011 Arab Spring. Houthi takeover of Sana'a 2014. Saudi-led coalition intervened 2015. Saleh killed by Houthis 2017. Saudi-Iran deal 2023 created space for peace talks derailed by Gaza war.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "IRN", "reason": "Houthi patron (for Houthi side)"},
+        {"country": "SAU", "reason": "Backs government (complex position)"},
+        {"country": "ARE", "reason": "Backs southern forces"}
+      ],
+      "tensions": [
+        {"country": "USA", "reason": "Strikes against Houthis over shipping"},
+        {"country": "ISR", "reason": "Houthi missile attacks"}
+      ]
+    }
+  },
+  "JOR": {
+    "basic": {
+      "name": "Jordan",
+      "capital": "Amman",
+      "region": "West Asia",
+      "government": "Constitutional monarchy",
+      "languages": ["Arabic"],
+      "currency": "Jordanian Dinar (JOD)"
+    },
+    "snapshot": {
+      "population": "11.4 million",
+      "gdp": "$51 billion",
+      "gdp_per_capita": "$4,500",
+      "economy_type": "Services and aid-dependent"
+    },
+    "identity": "Stable Hashemite monarchy in a dangerous neighborhood. Hosts millions of refugees. Peace treaty with Israel since 1994 strained by Gaza war but holding.",
+    "strengths": ["Political stability", "Well-trained military", "Western support", "Educated workforce", "Custodian of Jerusalem's Muslim holy sites"],
+    "weaknesses": ["Refugee burden (Palestinian, Iraqi, Syrian)", "Water scarcity extreme", "High unemployment", "Aid dependence", "Regional exposure"],
+    "current_position": "Vocally critical of Israel over Gaza while maintaining treaty; hosting US troops; managing Iranian-backed threats from Iraq and Syria; economic strain from regional disruption.",
+    "history_brief": "Created by British post-Ottoman. Hashemite dynasty installed 1921. Independence 1946. Lost West Bank in 1967 war. Peace with Israel 1994 under King Hussein. King Abdullah II on throne since 1999.",
+    "relationships": {
+      "allies": [
+        {"country": "USA", "reason": "Major non-NATO ally, military aid"},
+        {"country": "SAU", "reason": "Financial support, political alignment"},
+        {"country": "GBR", "reason": "Historic ties, defense"}
+      ],
+      "working": [
+        {"country": "ISR", "reason": "Peace treaty, water/security despite Gaza strain"},
+        {"country": "EGY", "reason": "Strategic alignment"},
+        {"country": "ARE", "reason": "Investment and aid"},
+        {"country": "TUR", "reason": "Trade and political ties"}
+      ],
+      "tensions": [
+        {"country": "IRN", "reason": "Militia threats via Iraq and Syria"}
+      ]
+    }
+  },
+  "LBN": {
+    "basic": {
+      "name": "Lebanon",
+      "capital": "Beirut",
+      "region": "West Asia",
+      "government": "Parliamentary republic (confessional system)",
+      "languages": ["Arabic", "French"],
+      "currency": "Lebanese Pound (LBP)"
+    },
+    "snapshot": {
+      "population": "5.4 million",
+      "gdp": "$22 billion",
+      "gdp_per_capita": "$4,100",
+      "economy_type": "Collapsed, services-based"
+    },
+    "identity": "Religiously divided (18 official sects) Mediterranean state with a collapsed economy and weakened Hezbollah. Living with the consequences of 2019 financial collapse and 2024 Israel-Hezbollah war.",
+    "strengths": ["Highly educated diaspora", "Historical regional hub", "Cultural production", "Strategic location"],
+    "weaknesses": ["Economic collapse since 2019", "Sectarian political paralysis", "Hezbollah state-within-state (weakened)", "Infrastructure decay", "Massive emigration"],
+    "current_position": "Post-2024 war, Hezbollah significantly degraded after Israeli campaign eliminating senior leadership; new presidency and government formed 2025 after long vacancy; hope for reconstruction funding.",
+    "history_brief": "French mandate, independent 1943 with sectarian power-sharing. Civil war 1975–90. Syrian occupation until 2005. 2006 Israel-Hezbollah war. 2019 economic collapse, Beirut port explosion 2020. Hezbollah joined Gaza war 2023, severe Israeli retaliation 2024.",
+    "relationships": {
+      "allies": [],
+      "working": [
+        {"country": "FRA", "reason": "Historic ties, mediator role"},
+        {"country": "SAU", "reason": "Post-Hezbollah-weakening re-engagement"},
+        {"country": "USA", "reason": "Political support for new government"},
+        {"country": "EGY", "reason": "Arab League role"}
+      ],
+      "tensions": [
+        {"country": "ISR", "reason": "Border conflict, 2024 war aftermath"},
+        {"country": "SYR", "reason": "Legacy tensions, border issues"}
+      ]
+    }
   }
 }
