@@ -51,7 +51,7 @@ export default function CountryPanel({
   return (
     <aside
       aria-hidden={!open}
-      className={`fixed right-0 top-0 z-40 flex h-full w-full max-w-[420px] transform flex-col border-l border-slate-800 bg-slate-900/80 text-slate-100 backdrop-blur-md transition-transform duration-300 ease-out ${
+      className={`fixed right-0 top-0 z-40 flex h-full w-full max-w-[520px] transform flex-col border-l border-slate-800 bg-slate-900/80 text-slate-100 backdrop-blur-md transition-transform duration-300 ease-out ${
         open ? 'translate-x-0' : 'translate-x-full'
       }`}
     >

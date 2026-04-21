@@ -58,7 +58,7 @@ export default function Globe({
         return getCountryColor(iso3, selectedCountry, countriesData);
       }}
       polygonSideColor={() => 'rgba(0, 0, 0, 0.15)'}
-      polygonStrokeColor={() => '#111'}
+      polygonStrokeColor={() => 'rgba(148, 163, 184, 0.6)'}
       polygonLabel={() => ''}
       onPolygonHover={(feat: object | null) => {
         onHover((feat as CountryFeature | null) ?? null);
