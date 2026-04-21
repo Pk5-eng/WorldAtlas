@@ -56,12 +56,20 @@ export default function Globe({
 
   useEffect(() => {
     const globe = globeRef.current as
-      | { controls?: () => { autoRotate: boolean; autoRotateSpeed: number } }
+      | {
+          controls?: () => { autoRotate: boolean; autoRotateSpeed: number };
+          globeMaterial?: () => { bumpScale?: number; needsUpdate?: boolean };
+        }
       | null;
     if (!globe?.controls) return;
     const controls = globe.controls();
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.35;
+    const material = globe.globeMaterial?.();
+    if (material) {
+      material.bumpScale = 8;
+      material.needsUpdate = true;
+    }
   }, [size.width]);
 
   return (
@@ -72,11 +80,12 @@ export default function Globe({
           width={size.width}
           height={size.height}
           globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg"
+          bumpImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png"
           backgroundColor="rgba(0,0,0,0)"
           polygonsData={features}
           polygonAltitude={(feat: object) => {
             const iso3 = (feat as CountryFeature).properties?.ADM0_A3 ?? '';
-            return iso3 === selectedCountry ? 0.05 : 0.025;
+            return iso3 === selectedCountry ? 0.02 : 0.008;
           }}
           polygonCapColor={(feat: object) => {
             const iso3 = (feat as CountryFeature).properties?.ADM0_A3 ?? '';
