@@ -67,7 +67,7 @@ export default function Globe({
     controls.autoRotateSpeed = 0.35;
     const material = globe.globeMaterial?.();
     if (material) {
-      material.bumpScale = 8;
+      material.bumpScale = 2.5;
       material.needsUpdate = true;
     }
   }, [size.width]);
@@ -85,14 +85,14 @@ export default function Globe({
           polygonsData={features}
           polygonAltitude={(feat: object) => {
             const iso3 = (feat as CountryFeature).properties?.ADM0_A3 ?? '';
-            return iso3 === selectedCountry ? 0.02 : 0.008;
+            return iso3 === selectedCountry ? 0.012 : 0.006;
           }}
           polygonCapColor={(feat: object) => {
             const iso3 = (feat as CountryFeature).properties?.ADM0_A3 ?? '';
             return getCountryColor(iso3, selectedCountry, countriesData);
           }}
-          polygonSideColor={() => 'rgba(15, 23, 42, 0.85)'}
-          polygonStrokeColor={() => 'rgba(148, 163, 184, 0.6)'}
+          polygonSideColor={() => 'rgb(15, 23, 42)'}
+          polygonStrokeColor={() => 'rgb(148, 163, 184)'}
           polygonLabel={() => ''}
           onPolygonHover={(feat: object | null) => {
             onHover((feat as CountryFeature | null) ?? null);
@@ -102,8 +102,8 @@ export default function Globe({
             if (iso3) onSelect(iso3);
           }}
           polygonsTransitionDuration={400}
-          atmosphereColor="#60a5fa"
-          atmosphereAltitude={0.15}
+          atmosphereColor="#3b82f6"
+          atmosphereAltitude={0.12}
         />
       )}
     </div>
