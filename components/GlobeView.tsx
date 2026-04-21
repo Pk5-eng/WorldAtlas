@@ -94,32 +94,39 @@ export default function GlobeView() {
     );
   }
 
+  const panelOpen = selectedCountry !== null;
+
   return (
     <div className="relative h-full w-full">
-      <GlobeErrorBoundary>
-        <Globe
-          features={features}
-          countriesData={countriesData as CountriesData}
-          selectedCountry={selectedCountry}
-          onHover={(feat) => {
-            if (!feat) {
-              setHovered(null);
-              return;
-            }
-            const iso3 = feat.properties?.ADM0_A3;
-            if (!iso3) {
-              setHovered(null);
-              return;
-            }
-            setHovered({
-              iso3,
-              iso2: feat.properties?.ISO_A2,
-              fallbackName: feat.properties?.NAME_LONG ?? feat.properties?.NAME,
-            });
-          }}
-          onSelect={setSelectedCountry}
-        />
-      </GlobeErrorBoundary>
+      <div
+        className="absolute bottom-0 left-0 top-0 transition-[right] duration-300 ease-out"
+        style={{ right: panelOpen ? 'min(100vw, 536px)' : 0 }}
+      >
+        <GlobeErrorBoundary>
+          <Globe
+            features={features}
+            countriesData={countriesData as CountriesData}
+            selectedCountry={selectedCountry}
+            onHover={(feat) => {
+              if (!feat) {
+                setHovered(null);
+                return;
+              }
+              const iso3 = feat.properties?.ADM0_A3;
+              if (!iso3) {
+                setHovered(null);
+                return;
+              }
+              setHovered({
+                iso3,
+                iso2: feat.properties?.ISO_A2,
+                fallbackName: feat.properties?.NAME_LONG ?? feat.properties?.NAME,
+              });
+            }}
+            onSelect={setSelectedCountry}
+          />
+        </GlobeErrorBoundary>
+      </div>
       <HoverTooltip
         hovered={hovered}
         selectedCountry={selectedCountry}

@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Feature } from 'geojson';
 import type { CountriesData } from '@/lib/types';
 import { getCountryColor } from '@/lib/colorMap';
@@ -35,6 +35,24 @@ export default function Globe({
   onSelect,
 }: GlobeProps) {
   const globeRef = useRef<unknown>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [size, setSize] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      setSize({ width: rect.width, height: rect.height });
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const globe = globeRef.current as
@@ -44,32 +62,41 @@ export default function Globe({
     const controls = globe.controls();
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.35;
-  }, []);
+  }, [size.width]);
 
   return (
-    <ReactGlobe
-      ref={globeRef as never}
-      globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg"
-      backgroundColor="#000010"
-      polygonsData={features}
-      polygonAltitude={0.01}
-      polygonCapColor={(feat: object) => {
-        const iso3 = (feat as CountryFeature).properties?.ADM0_A3 ?? '';
-        return getCountryColor(iso3, selectedCountry, countriesData);
-      }}
-      polygonSideColor={() => 'rgba(0, 0, 0, 0.15)'}
-      polygonStrokeColor={() => 'rgba(148, 163, 184, 0.6)'}
-      polygonLabel={() => ''}
-      onPolygonHover={(feat: object | null) => {
-        onHover((feat as CountryFeature | null) ?? null);
-      }}
-      onPolygonClick={(feat: object) => {
-        const iso3 = (feat as CountryFeature).properties?.ADM0_A3;
-        if (iso3) onSelect(iso3);
-      }}
-      polygonsTransitionDuration={400}
-      atmosphereColor="#60a5fa"
-      atmosphereAltitude={0.15}
-    />
+    <div ref={containerRef} className="h-full w-full">
+      {size.width > 0 && size.height > 0 && (
+        <ReactGlobe
+          ref={globeRef as never}
+          width={size.width}
+          height={size.height}
+          globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg"
+          backgroundColor="rgba(0,0,0,0)"
+          polygonsData={features}
+          polygonAltitude={(feat: object) => {
+            const iso3 = (feat as CountryFeature).properties?.ADM0_A3 ?? '';
+            return iso3 === selectedCountry ? 0.05 : 0.025;
+          }}
+          polygonCapColor={(feat: object) => {
+            const iso3 = (feat as CountryFeature).properties?.ADM0_A3 ?? '';
+            return getCountryColor(iso3, selectedCountry, countriesData);
+          }}
+          polygonSideColor={() => 'rgba(15, 23, 42, 0.85)'}
+          polygonStrokeColor={() => 'rgba(148, 163, 184, 0.6)'}
+          polygonLabel={() => ''}
+          onPolygonHover={(feat: object | null) => {
+            onHover((feat as CountryFeature | null) ?? null);
+          }}
+          onPolygonClick={(feat: object) => {
+            const iso3 = (feat as CountryFeature).properties?.ADM0_A3;
+            if (iso3) onSelect(iso3);
+          }}
+          polygonsTransitionDuration={400}
+          atmosphereColor="#60a5fa"
+          atmosphereAltitude={0.15}
+        />
+      )}
+    </div>
   );
 }
