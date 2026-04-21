@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# World Atlas
 
-## Getting Started
+An interactive 3D globe that shows high-level country intelligence. Spin the globe, hover for basics, click a country to open a side panel — the globe then recolors to show that country's allies, working partners, and tensions.
 
-First, run the development server:
+Personal project, snapshot as of early 2026. Asia-only data in v1; other continents render but show a graceful empty state.
+
+## Stack
+
+- Next.js 14 App Router, TypeScript (strict)
+- TailwindCSS
+- `react-globe.gl` (Three.js under the hood)
+- Static JSON — no backend, no database, no runtime API calls
+- Deploys to Vercel free tier
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Adding or editing country data
 
-To learn more about Next.js, take a look at the following resources:
+All country content lives in `data/countries.json`, keyed by ISO alpha-3 code (`ADM0_A3`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Follow the `CountryData` schema in `lib/types.ts`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `basic` — name, capital, region, government, languages, currency
+- `snapshot` — population, GDP, GDP per capita, economy type
+- `identity` — one-paragraph framing
+- `strengths` / `weaknesses` — arrays of strings
+- `current_position` — one paragraph on present-day posture
+- `history_brief` — one paragraph narrative
+- `relationships.allies` / `.working` / `.tensions` — each an array of `{ country: ISO3, reason: string }`
 
-## Deploy on Vercel
+The globe recolors from the `relationships` arrays of the currently selected country. Referenced ISO-3 codes should match keys in this file (or they'll just render neutral).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Data sources
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Country polygons: [Natural Earth](https://www.naturalearthdata.com/) (`ne_110m_admin_0_countries`), committed at `public/data/world-110m.geojson`. Use the `ADM0_A3` property for ISO alpha-3 — `ISO_A3` returns `-99` for disputed territories.
+- Narrative content: human-curated.
+
+## Deploying
+
+Push to `main` and Vercel will auto-deploy. No environment variables required.
+
+## Project layout
+
+```
+app/            Next.js App Router entry, layout, globals
+components/     GlobeView, Globe, CountryPanel, HoverTooltip, Legend, tabs/
+lib/            types, colorMap, flag emoji util
+data/           countries.json (the content)
+public/data/    world-110m.geojson (Natural Earth)
+```
