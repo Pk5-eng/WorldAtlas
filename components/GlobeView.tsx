@@ -6,6 +6,7 @@ import Globe from './Globe';
 import HoverTooltip from './HoverTooltip';
 import CountryPanel from './CountryPanel';
 import Legend from './Legend';
+import GlobeErrorBoundary from './GlobeErrorBoundary';
 import countriesData from '@/data/countries.json';
 import type { CountriesData } from '@/lib/types';
 
@@ -28,19 +29,25 @@ type HoverInfo = {
 
 export default function GlobeView() {
   const [features, setFeatures] = useState<CountryFeature[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [hovered, setHovered] = useState<HoverInfo | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     fetch('/data/world-110m.geojson')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((data: FeatureCollection) => {
         if (cancelled) return;
         setFeatures(data.features as CountryFeature[]);
       })
       .catch((err) => {
+        if (cancelled) return;
         console.error('Failed to load GeoJSON:', err);
+        setLoadError('Could not load the world map. Check your connection and refresh.');
       });
     return () => {
       cancelled = true;
@@ -70,38 +77,49 @@ export default function GlobeView() {
     return { iso2ByIso3: iso2Map, fallbackNameByIso3: nameMap };
   }, [features]);
 
+  if (loadError) {
+    return (
+      <div className="flex h-full w-full items-center justify-center px-6 text-center text-sm text-slate-400">
+        {loadError}
+      </div>
+    );
+  }
+
   if (!features) {
     return (
-      <div className="flex h-full w-full items-center justify-center text-slate-400">
-        Loading globe…
+      <div className="flex h-full w-full items-center justify-center gap-3 text-slate-400">
+        <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-blue-400" />
+        <span className="text-sm tracking-wide">Loading globe…</span>
       </div>
     );
   }
 
   return (
     <div className="relative h-full w-full">
-      <Globe
-        features={features}
-        countriesData={countriesData as CountriesData}
-        selectedCountry={selectedCountry}
-        onHover={(feat) => {
-          if (!feat) {
-            setHovered(null);
-            return;
-          }
-          const iso3 = feat.properties?.ADM0_A3;
-          if (!iso3) {
-            setHovered(null);
-            return;
-          }
-          setHovered({
-            iso3,
-            iso2: feat.properties?.ISO_A2,
-            fallbackName: feat.properties?.NAME_LONG ?? feat.properties?.NAME,
-          });
-        }}
-        onSelect={setSelectedCountry}
-      />
+      <GlobeErrorBoundary>
+        <Globe
+          features={features}
+          countriesData={countriesData as CountriesData}
+          selectedCountry={selectedCountry}
+          onHover={(feat) => {
+            if (!feat) {
+              setHovered(null);
+              return;
+            }
+            const iso3 = feat.properties?.ADM0_A3;
+            if (!iso3) {
+              setHovered(null);
+              return;
+            }
+            setHovered({
+              iso3,
+              iso2: feat.properties?.ISO_A2,
+              fallbackName: feat.properties?.NAME_LONG ?? feat.properties?.NAME,
+            });
+          }}
+          onSelect={setSelectedCountry}
+        />
+      </GlobeErrorBoundary>
       <HoverTooltip
         hovered={hovered}
         selectedCountry={selectedCountry}
